@@ -1,8 +1,6 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: #050507;
-  --color-foreground: #ededed;
   --color-teal: #00A9A5;
   --color-teal-dark: #008C89;
   --color-teal-light: #00C9C4;
@@ -13,19 +11,104 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Light mode defaults */
+:root {
+  --bg: #ffffff;
+  --bg-subtle: #f8f9fa;
+  --bg-card: #ffffff;
+  --bg-input: #f3f4f6;
+  --border: #e5e7eb;
+  --border-hover: #d1d5db;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #9ca3af;
+  --text-faint: #d1d5db;
+  --accent: #00A9A5;
+  --accent-hover: #008C89;
+  --glass-bg: rgba(255,255,255,0.7);
+  --glass-border: rgba(0,0,0,0.06);
+  --glow-color: rgba(0, 169, 165, 0.12);
+  --glow-color-strong: rgba(0, 169, 165, 0.2);
+  --mesh-1: rgba(0,169,165,0.04);
+  --mesh-2: rgba(123,45,142,0.03);
+  --mesh-3: rgba(0,169,165,0.02);
+  --ticker-bg: rgba(0,0,0,0.03);
+  --ticker-border: rgba(0,0,0,0.08);
+  --step-card-bg: rgba(0,0,0,0.02);
+  --step-num: #e5e7eb;
+  --section-border: #f3f4f6;
+  --feature-bg: rgba(0,0,0,0.015);
+  --badge-bg: rgba(0,169,165,0.08);
+  --badge-border: rgba(0,169,165,0.15);
+  --url-tag-bg: rgba(0,169,165,0.06);
+  --url-tag-border: rgba(0,169,165,0.12);
+  --google-btn-bg: #ffffff;
+  --google-btn-border: #e5e7eb;
+  --google-btn-text: #374151;
+  --google-btn-hover: #f9fafb;
+  --spinner-track: #e5e7eb;
+  --spinner-inner-track: #f3f4f6;
+  --check-text: #ffffff;
+  --input-focus-border: rgba(0,169,165,0.4);
+  color-scheme: light;
+}
+
+/* Dark mode */
+.dark {
+  --bg: #050507;
+  --bg-subtle: #0a0a0f;
+  --bg-card: #0f0f14;
+  --bg-input: #111118;
+  --border: #1e1e28;
+  --border-hover: #2a2a38;
+  --text-primary: #f0f0f5;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --text-faint: #374151;
+  --accent: #00A9A5;
+  --accent-hover: #00C9C4;
+  --glass-bg: rgba(255,255,255,0.03);
+  --glass-border: rgba(255,255,255,0.06);
+  --glow-color: rgba(0, 169, 165, 0.12);
+  --glow-color-strong: rgba(0, 169, 165, 0.25);
+  --mesh-1: rgba(0,169,165,0.06);
+  --mesh-2: rgba(123,45,142,0.04);
+  --mesh-3: rgba(0,169,165,0.02);
+  --ticker-bg: rgba(255,255,255,0.03);
+  --ticker-border: rgba(255,255,255,0.06);
+  --step-card-bg: rgba(255,255,255,0.02);
+  --step-num: #1e1e28;
+  --section-border: #111118;
+  --feature-bg: rgba(255,255,255,0.015);
+  --badge-bg: rgba(0,169,165,0.08);
+  --badge-border: rgba(0,169,165,0.2);
+  --url-tag-bg: rgba(0,169,165,0.08);
+  --url-tag-border: rgba(0,169,165,0.15);
+  --google-btn-bg: rgba(255,255,255,0.05);
+  --google-btn-border: rgba(255,255,255,0.1);
+  --google-btn-text: #d1d5db;
+  --google-btn-hover: rgba(255,255,255,0.08);
+  --spinner-track: #1e1e28;
+  --spinner-inner-track: #2a2a38;
+  --check-text: #ffffff;
+  --input-focus-border: rgba(0,169,165,0.4);
+  color-scheme: dark;
+}
+
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  background: var(--color-background);
-  color: var(--color-foreground);
+  background: var(--bg);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Animations */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 24px rgba(0, 169, 165, 0.12), 0 0 60px rgba(0, 169, 165, 0.06); }
-  50% { box-shadow: 0 0 32px rgba(0, 169, 165, 0.25), 0 0 80px rgba(0, 169, 165, 0.1); }
+  0%, 100% { box-shadow: 0 0 24px var(--glow-color), 0 0 60px rgba(0,169,165,0.04); }
+  50% { box-shadow: 0 0 32px var(--glow-color-strong), 0 0 80px rgba(0,169,165,0.08); }
 }
 
 @keyframes float {
@@ -53,11 +136,6 @@ body {
   100% { transform: translateX(-50%); }
 }
 
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
 @keyframes scale-in {
   from { opacity: 0; transform: scale(0.92); }
   to { opacity: 1; transform: scale(1); }
@@ -75,36 +153,31 @@ body {
 .animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
 .animate-spin-slow { animation: spin-slow 2s linear infinite; }
 .animate-ticker { animation: ticker 30s linear infinite; }
-.animate-shimmer {
-  background: linear-gradient(90deg, transparent, rgba(0,169,165,0.08), transparent);
-  background-size: 200% 100%;
-  animation: shimmer 2s ease-in-out infinite;
-}
 .animate-scale-in { animation: scale-in 0.4s ease-out forwards; }
 .animate-check-pop { animation: check-pop 0.4s ease-out forwards; }
 
-/* Delay utilities */
 .delay-100 { animation-delay: 100ms; }
 .delay-200 { animation-delay: 200ms; }
 .delay-300 { animation-delay: 300ms; }
 .delay-400 { animation-delay: 400ms; }
-.delay-500 { animation-delay: 500ms; }
 
-/* Gradient mesh background */
 .bg-mesh {
   background-image:
-    radial-gradient(at 20% 20%, rgba(0,169,165,0.06) 0px, transparent 60%),
-    radial-gradient(at 80% 80%, rgba(123,45,142,0.04) 0px, transparent 60%),
-    radial-gradient(at 50% 50%, rgba(0,169,165,0.02) 0px, transparent 80%);
+    radial-gradient(at 20% 20%, var(--mesh-1) 0px, transparent 60%),
+    radial-gradient(at 80% 80%, var(--mesh-2) 0px, transparent 60%),
+    radial-gradient(at 50% 50%, var(--mesh-3) 0px, transparent 80%);
 }
 
-/* Glass card */
 .glass {
-  background: rgba(255,255,255,0.03);
+  background: var(--glass-bg);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid var(--glass-border);
 }
 
-/* Hide scrollbar on ticker */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Logo dark mode inversion for Curio (dark text needs to become light) */
+.dark .logo-curio path[fill="#111111"] {
+  fill: #f0f0f5;
+}
