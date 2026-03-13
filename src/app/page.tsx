@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
+import AuthModal from "@/components/AuthModal";
+import AnalysisProgress from "@/components/AnalysisProgress";
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -18,15 +21,6 @@ const LIVE_FEED = [
   "Proposal #1,456 generated for carbon credit marketplace in 39s",
   "Equity tokenisation strategy created for Series B startup in 44s",
   "Proposal #738 delivered, ADGM compliance roadmap included",
-];
-
-const ANALYSIS_STEPS = [
-  { label: "Scanning website", icon: "globe" },
-  { label: "Mapping business model", icon: "chart" },
-  { label: "Identifying tokenisable assets", icon: "search" },
-  { label: "Modelling token economics", icon: "calc" },
-  { label: "Drafting regulatory framework", icon: "shield" },
-  { label: "Generating your proposal", icon: "doc" },
 ];
 
 const HOW_IT_WORKS = [
@@ -125,27 +119,17 @@ function ThemeToggle({ dark, toggle }: { dark: boolean; toggle: () => void }) {
 
 // ─── Logos ────────────────────────────────────────────────────────────────────
 
-function Deca4Logo({ className }: { className?: string }) {
-  return <Image src="/logos/deca4.svg" alt="Deca4 Advisory" width={136} height={50} className={className} priority />;
-}
-
-function CurioLogo({ className, dark }: { className?: string; dark: boolean }) {
-  return (
-    <Image
-      src="/logos/curio.svg" alt="curioInvest" width={120} height={20}
-      className={`${className ?? ""} ${dark ? "invert" : ""}`}
-      style={{ filter: dark ? "invert(1) hue-rotate(180deg)" : undefined }}
-      priority
-    />
-  );
-}
-
 function PartnerLogos({ dark }: { dark: boolean }) {
   return (
     <div className="flex items-center gap-4">
-      <Deca4Logo className="h-7 w-auto" />
+      <Image src="/logos/deca4.svg" alt="Deca4 Advisory" width={136} height={50} className="h-7 w-auto" priority />
       <span style={{ color: "var(--text-faint)" }} className="text-lg font-light">x</span>
-      <CurioLogo className="h-5 w-auto" dark={dark} />
+      <Image
+        src="/logos/curio.svg" alt="curioInvest" width={120} height={20}
+        className={`h-5 w-auto ${dark ? "invert" : ""}`}
+        style={{ filter: dark ? "invert(1) hue-rotate(180deg)" : undefined }}
+        priority
+      />
     </div>
   );
 }
@@ -170,63 +154,32 @@ function LiveFeedTicker() {
   );
 }
 
-function StepIcon({ type, done }: { type: string; done: boolean }) {
-  const icons: Record<string, string> = {
-    globe: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 0 1 4 9 15 15 0 0 1-4 9 15 15 0 0 1-4-9 15 15 0 0 1 4-9Z",
-    chart: "M3 3v18h18M7 16l4-4 4 4 5-5",
-    search: "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM21 21l-4.35-4.35",
-    calc: "M4 4h16v16H4zM4 10h16M10 4v16",
-    shield: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z",
-    doc: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8ZM14 2v6h6M16 13H8M16 17H8M10 9H8",
-  };
-  return (
-    <svg className="h-5 w-5 transition-colors duration-500" style={{ color: done ? "var(--accent)" : "var(--text-muted)" }}
-      fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-      <path d={icons[type] || icons.doc} />
-    </svg>
-  );
-}
-
-function GoogleIcon() {
-  return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24">
-      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1Z" fill="#4285F4"/>
-      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23Z" fill="#34A853"/>
-      <path d="M5.84 14.09A6.97 6.97 0 0 1 5.47 12c0-.72.13-1.43.37-2.09V7.07H2.18A11.96 11.96 0 0 0 0 12c0 1.94.46 3.77 1.28 5.4l3.56-2.77.01-.54Z" fill="#FBBC05"/>
-      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 1.77 14.97.5 12 .5 7.7.5 3.99 2.97 2.18 6.6l3.66 2.84c.87-2.6 3.3-4.06 6.16-4.06Z" fill="#EA4335"/>
-    </svg>
-  );
-}
-
 // ─── Main ────────────────────────────────────────────────────────────────────
 
-type FlowState = "landing" | "analysing" | "email";
+type FlowState = "landing" | "auth" | "analysing";
 
 export default function Home() {
+  const router = useRouter();
   const { dark, toggle } = useTheme();
   const [flow, setFlow] = useState<FlowState>("landing");
   const [url, setUrl] = useState("");
-  const [email, setEmail] = useState("");
   const [error, setError] = useState("");
-  const [currentStep, setCurrentStep] = useState(0);
+  const [userId, setUserId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Check if already authenticated
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.user) setUserId(data.user.id);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (flow === "landing") inputRef.current?.focus();
   }, [flow]);
-
-  // Analysis step progression → then transition to email capture
-  useEffect(() => {
-    if (flow !== "analysing") return;
-    if (currentStep >= ANALYSIS_STEPS.length - 1) {
-      // After final step completes, show email capture
-      const timer = setTimeout(() => setFlow("email"), 2000);
-      return () => clearTimeout(timer);
-    }
-    const durations = [1800, 2200, 1800, 2500, 1800, 2000];
-    const timer = setTimeout(() => setCurrentStep((s) => s + 1), durations[currentStep]);
-    return () => clearTimeout(timer);
-  }, [flow, currentStep]);
 
   const validateUrl = useCallback((raw: string): string | null => {
     const trimmed = raw.trim();
@@ -240,6 +193,38 @@ export default function Home() {
     }
   }, []);
 
+  const startProposal = useCallback(async (parsedUrl: string) => {
+    setFlow("analysing");
+
+    try {
+      const res = await fetch("/api/proposals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: parsedUrl }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Failed to create proposal");
+        setFlow("landing");
+        return;
+      }
+
+      // Store proposal ID for dashboard
+      const stored = JSON.parse(localStorage.getItem("proposalIds") || "[]") as string[];
+      if (!stored.includes(data.proposalId)) {
+        stored.unshift(data.proposalId);
+        localStorage.setItem("proposalIds", JSON.stringify(stored.slice(0, 50)));
+      }
+
+      // Navigate to questionnaire
+      router.push(`/questionnaire/${data.proposalId}`);
+    } catch {
+      setError("Network error. Please try again.");
+      setFlow("landing");
+    }
+  }, [router]);
+
   const handleUrlSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -247,21 +232,24 @@ export default function Home() {
     const parsed = validateUrl(url);
     if (!parsed) { setError("Enter a valid URL, e.g. yourcompany.com"); return; }
     setUrl(parsed);
-    setCurrentStep(0);
-    setFlow("analysing"); // Go straight to analysis — value before capture
+
+    if (userId) {
+      startProposal(parsed);
+    } else {
+      setFlow("auth");
+    }
   };
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    const trimmed = email.trim();
-    if (!trimmed) { setError("Enter your email to receive the full proposal"); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) { setError("Enter a valid email address"); return; }
-    // TODO: Submit to backend, deliver proposal
-    alert("Proposal will be sent to " + trimmed);
+  const handleAuthenticated = (newUserId: string) => {
+    setUserId(newUserId);
+    setFlow("landing");
+    const parsed = validateUrl(url);
+    if (parsed) {
+      startProposal(parsed);
+    }
   };
 
-  // ─── Analysing (value first, no gate) ───────────────────────────────────────
+  // ─── Analysing ─────────────────────────────────────────────────────────────
 
   if (flow === "analysing") {
     return (
@@ -269,126 +257,24 @@ export default function Home() {
         <div className="absolute right-4 top-4"><ThemeToggle dark={dark} toggle={toggle} /></div>
         <div className="animate-scale-in flex w-full max-w-md flex-col items-center gap-10">
           <PartnerLogos dark={dark} />
-
-          <div className="relative flex h-20 w-20 items-center justify-center">
-            <div className="absolute inset-0 rounded-full" style={{ border: "1px solid var(--spinner-track)" }} />
-            <div className="absolute inset-0 animate-spin-slow rounded-full border border-transparent border-t-[var(--color-teal)]" />
-            <div className="absolute inset-2 animate-spin-slow rounded-full border border-transparent border-b-[var(--color-purple)]" style={{ animationDirection: "reverse", animationDuration: "3s" }} />
-            <span className="font-mono text-xs" style={{ color: "var(--text-muted)" }}>
-              {Math.min(Math.round(((currentStep + 1) / ANALYSIS_STEPS.length) * 100), 99)}%
-            </span>
-          </div>
-
-          <div className="flex w-full flex-col gap-3">
-            {ANALYSIS_STEPS.map((step, i) => {
-              const done = i < currentStep;
-              const active = i === currentStep;
-              return (
-                <div key={step.label} className={`flex items-center gap-4 rounded-xl px-4 py-3 transition-all duration-500 ${active ? "glass" : ""}`} style={{ opacity: active ? 1 : done ? 0.6 : 0.25 }}>
-                  {done ? (
-                    <div className="animate-check-pop flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-teal)]">
-                      <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                    </div>
-                  ) : (
-                    <StepIcon type={step.icon} done={false} />
-                  )}
-                  <span className="text-sm" style={{ color: active ? "var(--text-primary)" : "var(--text-secondary)", fontWeight: active ? 500 : 400 }}>
-                    {step.label}
-                    {active && <span className="animate-pulse" style={{ color: "var(--accent)" }}>...</span>}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="flex items-center gap-2 rounded-full px-4 py-2" style={{ background: "var(--url-tag-bg)", border: "1px solid var(--url-tag-border)" }}>
-            <div className="h-2 w-2 animate-pulse rounded-full bg-[var(--color-teal)]" />
-            <span className="font-mono text-xs" style={{ color: "var(--text-muted)" }}>{url.replace(/^https?:\/\//, "")}</span>
-          </div>
+          <AnalysisProgress url={url} animate={true} />
         </div>
       </div>
     );
   }
 
-  // ─── Email Capture (after showing value) ────────────────────────────────────
-
-  if (flow === "email") {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-mesh px-6" style={{ background: "var(--bg)" }}>
-        <div className="absolute right-4 top-4"><ThemeToggle dark={dark} toggle={toggle} /></div>
-        <div className="animate-scale-in flex w-full max-w-md flex-col items-center gap-8">
-          <PartnerLogos dark={dark} />
-
-          <div className="flex flex-col items-center gap-3 text-center">
-            {/* Success badge */}
-            <div className="mb-1 flex items-center gap-2 rounded-full px-4 py-1.5" style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)" }}>
-              <svg className="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-              <span className="text-xs font-medium text-green-500">Proposal ready</span>
-            </div>
-
-            <h2 className="text-2xl font-bold sm:text-3xl" style={{ color: "var(--text-primary)" }}>
-              Your proposal is ready.
-            </h2>
-            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-              We analysed{" "}
-              <span className="font-mono font-medium" style={{ color: "var(--accent)" }}>
-                {url.replace(/^https?:\/\//, "")}
-              </span>{" "}
-              and generated a 6-section tokenisation strategy.
-            </p>
-          </div>
-
-          {/* Preview of what they get */}
-          <div className="w-full rounded-xl p-4" style={{ background: "var(--feature-bg)", border: "1px solid var(--border)" }}>
-            <p className="mb-3 text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Your proposal includes</p>
-            <div className="flex flex-col gap-2">
-              {["Asset Analysis", "Token Economics", "Regulatory Framework", "Smart Contract Architecture", "Go-to-Market Strategy", "Financial Projections"].map((section) => (
-                <div key={section} className="flex items-center gap-2">
-                  <svg className="h-3.5 w-3.5 text-[var(--color-teal)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                  <span className="text-sm" style={{ color: "var(--text-secondary)" }}>{section}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Email form */}
-          <form onSubmit={handleEmailSubmit} className="flex w-full flex-col gap-3">
-            <input
-              type="email" value={email}
-              onChange={(e) => { setEmail(e.target.value); setError(""); }}
-              placeholder="you@company.com"
-              autoFocus
-              className="w-full rounded-xl px-5 py-4 text-base outline-none transition-all"
-              style={{ background: "var(--bg-input)", border: "1px solid var(--border)", color: "var(--text-primary)" }}
-              onFocus={(e) => e.currentTarget.style.borderColor = "var(--input-focus-border)"}
-              onBlur={(e) => e.currentTarget.style.borderColor = "var(--border)"}
-            />
-            <button type="submit" className="w-full rounded-xl bg-[var(--color-teal)] py-4 text-base font-semibold text-white transition-all hover:shadow-lg active:scale-[0.98]" style={{ boxShadow: "0 4px 20px var(--glow-color)" }}>
-              Send My Proposal →
-            </button>
-            <button type="button" onClick={() => { setEmail("google-sso@placeholder.com"); }}
-              className="flex w-full items-center justify-center gap-3 rounded-xl py-3.5 text-sm transition-all"
-              style={{ background: "var(--google-btn-bg)", border: "1px solid var(--google-btn-border)", color: "var(--google-btn-text)" }}>
-              <GoogleIcon />
-              Continue with Google
-            </button>
-          </form>
-
-          {error && <p className="text-sm text-red-500">{error}</p>}
-
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            Free · No spam · Delivered in under 60 seconds
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // ─── Landing ────────────────────────────────────────────────────────────────
+  // ─── Landing ──────────────────────────────────────────────────────────────
 
   return (
     <div className="relative min-h-screen bg-mesh" style={{ background: "var(--bg)" }}>
-      {/* Trust Banner — Forbes credibility anchor */}
+      {/* Auth Modal */}
+      <AuthModal
+        open={flow === "auth"}
+        onClose={() => setFlow("landing")}
+        onAuthenticated={handleAuthenticated}
+      />
+
+      {/* Trust Banner */}
       <a
         href="https://forbes.swiss/forbes-assetization-leaders-list/listmaker/fernando-verboonenceo-curioinvest-curio-capital-ag"
         target="_blank" rel="noopener noreferrer"
@@ -406,6 +292,11 @@ export default function Home() {
         <div className="flex items-center gap-5">
           <a href="#how-it-works" className="hidden text-sm transition-colors hover:underline sm:block" style={{ color: "var(--text-secondary)" }}>How it works</a>
           <a href="#features" className="hidden text-sm transition-colors hover:underline sm:block" style={{ color: "var(--text-secondary)" }}>Features</a>
+          {userId && (
+            <button onClick={() => router.push("/dashboard")} className="hidden text-sm transition-colors hover:underline sm:block" style={{ color: "var(--text-secondary)" }}>
+              Dashboard
+            </button>
+          )}
           <ThemeToggle dark={dark} toggle={toggle} />
         </div>
       </nav>
@@ -448,17 +339,15 @@ export default function Home() {
 
           {error && <p className="animate-fade-in text-sm text-red-500">{error}</p>}
 
-          {/* 3-part objection killer */}
           <p className="animate-fade-in-up flex items-center gap-3 text-xs opacity-0 delay-300" style={{ color: "var(--text-muted)" }}>
             <span>Free</span>
             <span style={{ color: "var(--text-faint)" }}>·</span>
-            <span>No signup required</span>
+            <span>No credit card required</span>
             <span style={{ color: "var(--text-faint)" }}>·</span>
             <span>Proposal in 90 seconds</span>
           </p>
 
-          {/* Or book a demo */}
-          <a href="#" className="animate-fade-in-up text-xs opacity-0 delay-400 transition-colors hover:underline" style={{ color: "var(--text-muted)" }}>
+          <a href="https://calendly.com/deca4" target="_blank" rel="noopener noreferrer" className="animate-fade-in-up text-xs opacity-0 delay-400 transition-colors hover:underline" style={{ color: "var(--text-muted)" }}>
             or schedule a consultation →
           </a>
         </div>
@@ -528,7 +417,6 @@ export default function Home() {
       <section style={{ borderTop: "1px solid var(--section-border)" }} className="py-20">
         <div className="mx-auto max-w-3xl px-6 sm:px-12">
           <div className="flex flex-col items-center gap-8 text-center">
-            {/* Forbes badge */}
             <a
               href="https://forbes.swiss/forbes-assetization-leaders-list/listmaker/fernando-verboonenceo-curioinvest-curio-capital-ag"
               target="_blank" rel="noopener noreferrer"
@@ -540,7 +428,6 @@ export default function Home() {
               <svg className="h-3 w-3 opacity-50 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
             </a>
 
-            {/* Quote */}
             <blockquote className="max-w-xl">
               <p className="text-xl font-light italic leading-relaxed sm:text-2xl" style={{ color: "var(--text-primary)" }}>
                 &ldquo;We started with a $1.1M Ferrari, now we&apos;re reaching 1 billion users through Telegram.&rdquo;
@@ -552,7 +439,6 @@ export default function Home() {
               <p className="text-xs" style={{ color: "var(--text-muted)" }}>CEO, curioInvest / Curio Capital AG</p>
             </div>
 
-            {/* Key figures */}
             <div className="flex items-center gap-8">
               <div className="flex flex-col items-center">
                 <span className="font-mono text-lg font-bold" style={{ color: "var(--accent)" }}>$1B+</span>
@@ -571,7 +457,6 @@ export default function Home() {
       {/* Final CTA with Metrics */}
       <section style={{ borderTop: "1px solid var(--section-border)" }} className="py-28">
         <div className="mx-auto flex max-w-3xl flex-col items-center gap-12 px-6 text-center">
-          {/* Metrics */}
           <div className="flex w-full max-w-md justify-between">
             {METRICS.map((m) => (
               <div key={m.label} className="flex flex-col items-center gap-1">
@@ -597,7 +482,7 @@ export default function Home() {
               style={{ boxShadow: "0 4px 20px var(--glow-color)" }}>
               Generate Proposal →
             </button>
-            <a href="#" className="rounded-xl px-8 py-4 text-base font-medium transition-all"
+            <a href="https://calendly.com/deca4" target="_blank" rel="noopener noreferrer" className="rounded-xl px-8 py-4 text-base font-medium transition-all"
               style={{ border: "1px solid var(--border)", color: "var(--text-secondary)", background: "var(--bg-card)" }}>
               Schedule a Call
             </a>
