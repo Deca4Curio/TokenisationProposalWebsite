@@ -81,8 +81,8 @@ const FEATURES = [
 ];
 
 const METRICS = [
+  { value: "$1B+", label: "tokenisation pipeline" },
   { value: "90s", label: "avg. proposal time" },
-  { value: "6", label: "proposal sections" },
   { value: "12+", label: "jurisdictions covered" },
 ];
 
@@ -388,10 +388,17 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen bg-mesh" style={{ background: "var(--bg)" }}>
-      {/* Trust Banner */}
-      <div className="w-full py-2.5 text-center text-xs font-medium" style={{ background: "var(--badge-bg)", borderBottom: "1px solid var(--badge-border)", color: "var(--accent)" }}>
-        Powered by Deca4 Advisory FZE · Dubai World Trade Center · Trusted by institutional asset managers
-      </div>
+      {/* Trust Banner — Forbes credibility anchor */}
+      <a
+        href="https://forbes.swiss/forbes-assetization-leaders-list/listmaker/fernando-verboonenceo-curioinvest-curio-capital-ag"
+        target="_blank" rel="noopener noreferrer"
+        className="group flex w-full items-center justify-center gap-2 py-2.5 text-center text-xs font-medium transition-all hover:opacity-80"
+        style={{ background: "var(--badge-bg)", borderBottom: "1px solid var(--badge-border)", color: "var(--accent)" }}
+      >
+        <svg className="h-3 w-3 opacity-60" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <span>Featured on <strong>Forbes Assetization Leaders List</strong> · $1B+ tokenisation pipeline · Deca4 Advisory x curioInvest</span>
+        <svg className="h-3 w-3 opacity-40 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
+      </a>
 
       {/* Nav */}
       <nav className="sticky top-0 z-50 flex w-full items-center justify-between px-6 py-4 backdrop-blur-lg sm:px-12" style={{ borderBottom: "1px solid var(--border)", background: dark ? "rgba(5,5,7,0.85)" : "rgba(255,255,255,0.88)" }}>
@@ -513,6 +520,50 @@ export default function Home() {
                 <p className="text-xs font-mono" style={{ color: "var(--text-faint)" }}>{item.detail}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Forbes Social Proof */}
+      <section style={{ borderTop: "1px solid var(--section-border)" }} className="py-20">
+        <div className="mx-auto max-w-3xl px-6 sm:px-12">
+          <div className="flex flex-col items-center gap-8 text-center">
+            {/* Forbes badge */}
+            <a
+              href="https://forbes.swiss/forbes-assetization-leaders-list/listmaker/fernando-verboonenceo-curioinvest-curio-capital-ag"
+              target="_blank" rel="noopener noreferrer"
+              className="group flex items-center gap-2 rounded-full px-5 py-2 text-xs font-semibold uppercase tracking-wider transition-all hover:opacity-80"
+              style={{ background: "var(--badge-bg)", border: "1px solid var(--badge-border)", color: "var(--accent)" }}
+            >
+              <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              Forbes Assetization Leaders List
+              <svg className="h-3 w-3 opacity-50 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            </a>
+
+            {/* Quote */}
+            <blockquote className="max-w-xl">
+              <p className="text-xl font-light italic leading-relaxed sm:text-2xl" style={{ color: "var(--text-primary)" }}>
+                &ldquo;We started with a $1.1M Ferrari, now we&apos;re reaching 1 billion users through Telegram.&rdquo;
+              </p>
+            </blockquote>
+
+            <div className="flex flex-col items-center gap-1">
+              <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Fernando Verboonen</p>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>CEO, curioInvest / Curio Capital AG</p>
+            </div>
+
+            {/* Key figures */}
+            <div className="flex items-center gap-8">
+              <div className="flex flex-col items-center">
+                <span className="font-mono text-lg font-bold" style={{ color: "var(--accent)" }}>$1B+</span>
+                <span className="text-xs" style={{ color: "var(--text-muted)" }}>pipeline under MOU</span>
+              </div>
+              <div style={{ width: 1, height: 32, background: "var(--border)" }} />
+              <div className="flex flex-col items-center">
+                <span className="font-mono text-lg font-bold" style={{ color: "var(--accent)" }}>$3M+</span>
+                <span className="text-xs" style={{ color: "var(--text-muted)" }}>assets tokenised</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
