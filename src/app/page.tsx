@@ -165,6 +165,7 @@ export default function Home() {
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Check if already authenticated
@@ -172,7 +173,10 @@ export default function Home() {
     fetch("/api/auth/me")
       .then((r) => r.json())
       .then((data) => {
-        if (data.user) setUserId(data.user.id);
+        if (data.user) {
+          setUserId(data.user.id);
+          setUserEmail(data.user.email);
+        }
       })
       .catch(() => {});
   }, []);
@@ -208,13 +212,6 @@ export default function Home() {
         setError(data.error || "Failed to create proposal");
         setFlow("landing");
         return;
-      }
-
-      // Store proposal ID for dashboard
-      const stored = JSON.parse(localStorage.getItem("proposalIds") || "[]") as string[];
-      if (!stored.includes(data.proposalId)) {
-        stored.unshift(data.proposalId);
-        localStorage.setItem("proposalIds", JSON.stringify(stored.slice(0, 50)));
       }
 
       // Navigate to questionnaire
@@ -292,9 +289,18 @@ export default function Home() {
         <div className="flex items-center gap-5">
           <a href="#how-it-works" className="hidden text-sm transition-colors hover:underline sm:block" style={{ color: "var(--text-secondary)" }}>How it works</a>
           <a href="#features" className="hidden text-sm transition-colors hover:underline sm:block" style={{ color: "var(--text-secondary)" }}>Features</a>
-          {userId && (
-            <button onClick={() => router.push("/dashboard")} className="hidden text-sm transition-colors hover:underline sm:block" style={{ color: "var(--text-secondary)" }}>
-              Dashboard
+          {userId ? (
+            <>
+              <button onClick={() => router.push("/dashboard")} className="hidden text-sm transition-colors hover:underline sm:block" style={{ color: "var(--text-secondary)" }}>
+                Dashboard
+              </button>
+              <span className="hidden text-xs sm:block" style={{ color: "var(--text-muted)" }}>
+                {userEmail}
+              </span>
+            </>
+          ) : (
+            <button onClick={() => setFlow("auth")} className="hidden text-sm font-medium transition-colors hover:underline sm:block" style={{ color: "var(--accent)" }}>
+              Sign in
             </button>
           )}
           <ThemeToggle dark={dark} toggle={toggle} />

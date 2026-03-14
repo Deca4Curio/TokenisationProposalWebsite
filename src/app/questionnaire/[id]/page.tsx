@@ -1,11 +1,24 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import AnalysisProgress from "@/components/AnalysisProgress";
 import QuestionnaireForm from "@/components/QuestionnaireForm";
 import type { Proposal, Questionnaire } from "@/types";
+
+const GENERATING_PHRASES = [
+  "Thinking...",
+  "Analysing your asset structure...",
+  "Modelling token economics...",
+  "Imagining your tokenisation...",
+  "Mapping regulatory frameworks...",
+  "Designing smart contract architecture...",
+  "Building financial projections...",
+  "Crafting your go-to-market strategy...",
+  "Putting it all together...",
+  "Almost there...",
+];
 
 function useTheme() {
   const [dark, setDark] = useState(true);
@@ -29,6 +42,21 @@ export default function QuestionnairePage() {
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const phraseInterval = useRef<NodeJS.Timeout | null>(null);
+
+  // Rotate generating phrases
+  useEffect(() => {
+    if (submitting) {
+      phraseInterval.current = setInterval(() => {
+        setPhraseIndex((i) => (i + 1) % GENERATING_PHRASES.length);
+      }, 3000);
+    } else {
+      if (phraseInterval.current) clearInterval(phraseInterval.current);
+      setPhraseIndex(0);
+    }
+    return () => { if (phraseInterval.current) clearInterval(phraseInterval.current); };
+  }, [submitting]);
 
   // Poll for proposal data
   useEffect(() => {
@@ -135,6 +163,76 @@ export default function QuestionnairePage() {
           >
             Try Again
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Generating report state
+  if (submitting) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center px-6" style={{ background: "var(--bg)" }}>
+        <div className="animate-scale-in flex w-full max-w-md flex-col items-center gap-10">
+          <div className="flex items-center gap-4">
+            <Image src="/logos/deca4.svg" alt="Deca4" width={136} height={50} className="h-7 w-auto" priority />
+            <span style={{ color: "var(--text-faint)" }} className="text-lg font-light">x</span>
+            <Image
+              src="/logos/curio.svg" alt="Curio" width={120} height={20}
+              className={`h-5 w-auto ${dark ? "invert" : ""}`}
+              style={{ filter: dark ? "invert(1) hue-rotate(180deg)" : undefined }}
+              priority
+            />
+          </div>
+
+          {/* Spinner */}
+          <div className="relative flex h-24 w-24 items-center justify-center">
+            <div className="absolute inset-0 rounded-full" style={{ border: "1px solid var(--spinner-track)" }} />
+            <div className="absolute inset-0 animate-spin-slow rounded-full border-2 border-transparent border-t-[var(--color-teal)]" />
+            <div
+              className="absolute inset-3 animate-spin-slow rounded-full border border-transparent border-b-[var(--color-purple)]"
+              style={{ animationDirection: "reverse", animationDuration: "3s" }}
+            />
+            <svg className="h-6 w-6" style={{ color: "var(--accent)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+            </svg>
+          </div>
+
+          {/* Rotating phrase */}
+          <div className="flex flex-col items-center gap-3 text-center">
+            <h2 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
+              Generating your proposal
+            </h2>
+            <p
+              key={phraseIndex}
+              className="animate-fade-in text-sm"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              {GENERATING_PHRASES[phraseIndex]}
+            </p>
+          </div>
+
+          {/* URL tag */}
+          <div
+            className="flex items-center gap-2 rounded-full px-4 py-2"
+            style={{ background: "var(--url-tag-bg)", border: "1px solid var(--url-tag-border)" }}
+          >
+            <div className="h-2 w-2 animate-pulse rounded-full bg-[var(--color-teal)]" />
+            <span className="font-mono text-xs" style={{ color: "var(--text-muted)" }}>
+              {proposal?.url.replace(/^https?:\/\//, "")}
+            </span>
+          </div>
+
+          {error && (
+            <div className="rounded-xl p-4 text-center text-sm text-red-500" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
+              {error}
+              <button
+                onClick={() => { setSubmitting(false); setError(""); }}
+                className="mt-2 block w-full text-xs underline"
+              >
+                Go back to questionnaire
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
