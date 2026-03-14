@@ -61,8 +61,17 @@ export default function ReportPage() {
     return () => { cancelled = true; };
   }, [id, router]);
 
-  // Loading / generating state
-  if (!proposal || proposal.status === "generating" || proposal.status === "scraping") {
+  // Initial loading (fetching proposal data)
+  if (!proposal) {
+    return (
+      <div className="flex min-h-screen items-center justify-center" style={{ background: "var(--bg)" }}>
+        <div className="animate-spin-slow h-10 w-10 rounded-full border-2 border-transparent border-t-[var(--color-teal)]" />
+      </div>
+    );
+  }
+
+  // Still generating
+  if (proposal.status === "generating" || proposal.status === "scraping") {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-6" style={{ background: "var(--bg)" }}>
         <div className="flex w-full max-w-md flex-col items-center gap-10">
@@ -76,7 +85,7 @@ export default function ReportPage() {
               priority
             />
           </div>
-          <AnalysisProgress url={proposal?.url || "..."} animate={true} />
+          <AnalysisProgress url={proposal.url} animate={true} />
           <p className="text-center text-sm" style={{ color: "var(--text-secondary)" }}>
             Generating your tokenisation report...
           </p>
