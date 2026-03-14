@@ -30,7 +30,7 @@ function getApp(): App {
 export function getDb(): Firestore {
   if (!db) {
     getApp();
-    db = getFirestore();
+    db = getFirestore("deca4curio-tokenisation-engine");
   }
   return db;
 }
