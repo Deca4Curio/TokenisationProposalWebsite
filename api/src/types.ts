@@ -12,6 +12,11 @@ export type ProposalStatus =
   | "report_ready"
   | "error";
 
+export interface ScrapedPage {
+  url: string;
+  content: string;
+}
+
 export interface Questionnaire {
   companyName: string;
   industry: string;
@@ -34,6 +39,7 @@ export interface Proposal {
   userId: string;
   url: string;
   status: ProposalStatus;
+  scrapedContent?: ScrapedPage[];
   questionnaire?: Questionnaire;
   questionnaireSubmitted?: Questionnaire;
   report?: ReportSection[];

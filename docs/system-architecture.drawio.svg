@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="1100px" height="780px" viewBox="-0.5 -0.5 1100 780" style="background-color: rgb(255, 255, 255);">
+
+  <!-- Title -->
+  <text x="550" y="35" font-family="Helvetica" font-size="22" font-weight="bold" text-anchor="middle" fill="#333333">Tokenisation Proposal Engine — System Architecture</text>
+  <text x="550" y="58" font-family="Helvetica" font-size="13" text-anchor="middle" fill="#999999">Deca4 x Curio · Next.js 16 Monorepo on GCP Cloud Run</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- COLUMN 1: USER / BROWSER -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+  <!-- User icon circle -->
+  <circle cx="100" cy="160" r="28" fill="#dae8fc" stroke="#6c8ebf" stroke-width="2"/>
+  <text x="100" y="165" font-family="Helvetica" font-size="20" text-anchor="middle" fill="#6c8ebf">👤</text>
+  <text x="100" y="208" font-family="Helvetica" font-size="13" font-weight="bold" text-anchor="middle" fill="#333333">User</text>
+
+  <!-- Browser box -->
+  <rect x="30" y="250" width="140" height="420" rx="12" ry="12" fill="#dae8fc" stroke="#6c8ebf" stroke-width="2"/>
+  <text x="100" y="278" font-family="Helvetica" font-size="14" font-weight="bold" text-anchor="middle" fill="#333333">Browser</text>
+  <line x1="40" y1="290" x2="160" y2="290" stroke="#6c8ebf" stroke-width="1" opacity="0.3"/>
+
+  <!-- Frontend pages -->
+  <rect x="45" y="305" width="110" height="36" rx="6" ry="6" fill="#ffffff" stroke="#6c8ebf" stroke-width="1.5"/>
+  <text x="100" y="328" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="middle" fill="#333333">/ Landing</text>
+
+  <rect x="45" y="355" width="110" height="36" rx="6" ry="6" fill="#ffffff" stroke="#6c8ebf" stroke-width="1.5"/>
+  <text x="100" y="378" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="middle" fill="#333333">AuthModal</text>
+
+  <rect x="45" y="405" width="110" height="36" rx="6" ry="6" fill="#ffffff" stroke="#6c8ebf" stroke-width="1.5"/>
+  <text x="100" y="428" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="middle" fill="#333333">/questionnaire/[id]</text>
+
+  <rect x="45" y="455" width="110" height="36" rx="6" ry="6" fill="#ffffff" stroke="#6c8ebf" stroke-width="1.5"/>
+  <text x="100" y="478" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="middle" fill="#333333">/report/[id]</text>
+
+  <rect x="45" y="505" width="110" height="36" rx="6" ry="6" fill="#ffffff" stroke="#6c8ebf" stroke-width="1.5"/>
+  <text x="100" y="528" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="middle" fill="#333333">/dashboard</text>
+
+  <!-- Components label -->
+  <text x="100" y="565" font-family="Helvetica" font-size="10" text-anchor="middle" fill="#6c8ebf">Components:</text>
+  <text x="100" y="580" font-family="Helvetica" font-size="9" text-anchor="middle" fill="#999999">AnalysisProgress</text>
+  <text x="100" y="593" font-family="Helvetica" font-size="9" text-anchor="middle" fill="#999999">QuestionnaireForm</text>
+  <text x="100" y="606" font-family="Helvetica" font-size="9" text-anchor="middle" fill="#999999">ReportView</text>
+  <text x="100" y="619" font-family="Helvetica" font-size="9" text-anchor="middle" fill="#999999">ProposalCard</text>
+  <text x="100" y="632" font-family="Helvetica" font-size="9" text-anchor="middle" fill="#999999">StatusBadge</text>
+
+  <!-- Arrow: User → Browser -->
+  <path d="M 100 188 L 100 245" fill="none" stroke="#6c8ebf" stroke-width="2"/>
+  <path d="M 100 250 L 96.5 243 L 100 245 L 103.5 243 Z" fill="#6c8ebf" stroke="#6c8ebf" stroke-width="2"/>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- COLUMN 2: NEXT.JS API ROUTES (Cloud Run) -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+  <!-- Cloud Run container -->
+  <rect x="260" y="100" width="300" height="600" rx="12" ry="12" fill="#fff2cc" stroke="#d6b656" stroke-width="2" stroke-dasharray="8,4"/>
+  <text x="410" y="128" font-family="Helvetica" font-size="14" font-weight="bold" text-anchor="middle" fill="#333333">Cloud Run — Next.js 16</text>
+  <text x="410" y="146" font-family="Helvetica" font-size="11" text-anchor="middle" fill="#999999">europe-west1 · Port 8080</text>
+
+  <!-- API Routes group -->
+  <rect x="280" y="170" width="260" height="280" rx="8" ry="8" fill="#fff9e6" stroke="#d6b656" stroke-width="1.5"/>
+  <text x="410" y="195" font-family="Helvetica" font-size="13" font-weight="bold" text-anchor="middle" fill="#333333">API Routes</text>
+
+  <!-- Auth routes -->
+  <rect x="295" y="210" width="230" height="32" rx="6" ry="6" fill="#ffffff" stroke="#d6b656" stroke-width="1"/>
+  <text x="310" y="231" font-family="Helvetica" font-size="11" text-anchor="start" fill="#333333">POST</text>
+  <text x="345" y="231" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="start" fill="#333333">/api/auth/signup</text>
+
+  <rect x="295" y="250" width="230" height="32" rx="6" ry="6" fill="#ffffff" stroke="#d6b656" stroke-width="1"/>
+  <text x="310" y="271" font-family="Helvetica" font-size="11" text-anchor="start" fill="#333333">GET</text>
+  <text x="340" y="271" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="start" fill="#333333">/api/auth/me</text>
+
+  <!-- Proposal routes -->
+  <rect x="295" y="295" width="230" height="32" rx="6" ry="6" fill="#ffffff" stroke="#d6b656" stroke-width="1"/>
+  <text x="310" y="316" font-family="Helvetica" font-size="11" text-anchor="start" fill="#333333">POST</text>
+  <text x="345" y="316" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="start" fill="#333333">/api/proposals</text>
+
+  <rect x="295" y="335" width="230" height="32" rx="6" ry="6" fill="#ffffff" stroke="#d6b656" stroke-width="1"/>
+  <text x="310" y="356" font-family="Helvetica" font-size="11" text-anchor="start" fill="#333333">GET</text>
+  <text x="340" y="356" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="start" fill="#333333">/api/proposals/[id]</text>
+
+  <rect x="295" y="375" width="230" height="32" rx="6" ry="6" fill="#ffffff" stroke="#d6b656" stroke-width="1"/>
+  <text x="310" y="396" font-family="Helvetica" font-size="11" text-anchor="start" fill="#333333">PUT</text>
+  <text x="340" y="396" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="start" fill="#333333">/api/proposals/[id]/questionnaire</text>
+
+  <rect x="295" y="415" width="230" height="32" rx="6" ry="6" fill="#ffffff" stroke="#d6b656" stroke-width="1"/>
+  <text x="310" y="436" font-family="Helvetica" font-size="11" text-anchor="start" fill="#333333">POST</text>
+  <text x="345" y="436" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="start" fill="#333333">/api/proposals/[id]/report</text>
+
+  <!-- Lib layer -->
+  <rect x="280" y="470" width="260" height="120" rx="8" ry="8" fill="#fff9e6" stroke="#d6b656" stroke-width="1.5"/>
+  <text x="410" y="495" font-family="Helvetica" font-size="13" font-weight="bold" text-anchor="middle" fill="#333333">Lib Layer</text>
+
+  <rect x="295" y="505" width="110" height="30" rx="6" ry="6" fill="#ffe6cc" stroke="#d79b00" stroke-width="1"/>
+  <text x="350" y="525" font-family="Helvetica" font-size="10" font-weight="bold" text-anchor="middle" fill="#333333">firebase.ts</text>
+
+  <rect x="415" y="505" width="110" height="30" rx="6" ry="6" fill="#ffe6cc" stroke="#d79b00" stroke-width="1"/>
+  <text x="470" y="525" font-family="Helvetica" font-size="10" font-weight="bold" text-anchor="middle" fill="#333333">auth.ts</text>
+
+  <rect x="295" y="545" width="110" height="30" rx="6" ry="6" fill="#ffe6cc" stroke="#d79b00" stroke-width="1"/>
+  <text x="350" y="565" font-family="Helvetica" font-size="10" font-weight="bold" text-anchor="middle" fill="#333333">firecrawl.ts</text>
+
+  <rect x="415" y="545" width="110" height="30" rx="6" ry="6" fill="#ffe6cc" stroke="#d79b00" stroke-width="1"/>
+  <text x="470" y="565" font-family="Helvetica" font-size="10" font-weight="bold" text-anchor="middle" fill="#333333">claude.ts</text>
+
+  <!-- Types box -->
+  <rect x="340" y="610" width="140" height="30" rx="6" ry="6" fill="#f5f5f5" stroke="#999999" stroke-width="1"/>
+  <text x="410" y="630" font-family="Helvetica" font-size="10" font-weight="bold" text-anchor="middle" fill="#666666">types/index.ts</text>
+
+  <!-- Arrow: Browser → API -->
+  <path d="M 170 400 L 255 400" fill="none" stroke="#333333" stroke-width="2"/>
+  <path d="M 260 400 L 253 396.5 L 255 400 L 253 403.5 Z" fill="#333333" stroke="#333333" stroke-width="2"/>
+  <text x="215" y="393" font-family="Helvetica" font-size="10" text-anchor="middle" fill="#999999">fetch()</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- COLUMN 3: EXTERNAL SERVICES -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+  <!-- Firestore -->
+  <rect x="680" y="160" width="180" height="100" rx="10" ry="10" fill="#d5e8d4" stroke="#82b366" stroke-width="2"/>
+  <text x="770" y="195" font-family="Helvetica" font-size="14" font-weight="bold" text-anchor="middle" fill="#333333">Firestore</text>
+  <text x="770" y="215" font-family="Helvetica" font-size="10" text-anchor="middle" fill="#666666">users / proposals / sessions</text>
+  <text x="770" y="232" font-family="Helvetica" font-size="10" text-anchor="middle" fill="#999999">europe-west1</text>
+  <text x="770" y="250" font-family="Helvetica" font-size="10" text-anchor="middle" fill="#82b366">✓ Created</text>
+
+  <!-- Arrow: API → Firestore -->
+  <path d="M 560 310 L 610 260 L 675 220" fill="none" stroke="#82b366" stroke-width="2"/>
+  <path d="M 680 218 L 673 216 L 675 220 L 672 223 Z" fill="#82b366" stroke="#82b366" stroke-width="2"/>
+  <text x="630" y="250" font-family="Helvetica" font-size="10" text-anchor="middle" fill="#82b366">CRUD</text>
+
+  <!-- Firecrawl -->
+  <rect x="680" y="310" width="180" height="90" rx="10" ry="10" fill="#e1d5e7" stroke="#9673a6" stroke-width="2"/>
+  <text x="770" y="345" font-family="Helvetica" font-size="14" font-weight="bold" text-anchor="middle" fill="#333333">Firecrawl</text>
+  <text x="770" y="365" font-family="Helvetica" font-size="10" text-anchor="middle" fill="#666666">Web scraping API</text>
+  <text x="770" y="382" font-family="Helvetica" font-size="10" text-anchor="middle" fill="#666666">URL → Markdown</text>
+
+  <!-- Arrow: API → Firecrawl -->
+  <path d="M 560 350 L 675 355" fill="none" stroke="#9673a6" stroke-width="2"/>
+  <path d="M 680 355 L 673 351.5 L 675 355 L 673 358.5 Z" fill="#9673a6" stroke="#9673a6" stroke-width="2"/>
+  <text x="620" y="345" font-family="Helvetica" font-size="10" text-anchor="middle" fill="#9673a6">scrape</text>
+
+  <!-- Claude API -->
+  <rect x="680" y="450" width="180" height="100" rx="10" ry="10" fill="#e1d5e7" stroke="#9673a6" stroke-width="2"/>
+  <text x="770" y="485" font-family="Helvetica" font-size="14" font-weight="bold" text-anchor="middle" fill="#333333">Claude API</text>
+  <text x="770" y="505" font-family="Helvetica" font-size="10" text-anchor="middle" fill="#666666">Sonnet 4 · Anthropic</text>
+  <text x="770" y="522" font-family="Helvetica" font-size="10" text-anchor="middle" fill="#666666">prefill + report gen</text>
+
+  <!-- Arrow: API → Claude -->
+  <path d="M 560 500 L 675 500" fill="none" stroke="#9673a6" stroke-width="2"/>
+  <path d="M 680 500 L 673 496.5 L 675 500 L 673 503.5 Z" fill="#9673a6" stroke="#9673a6" stroke-width="2"/>
+  <text x="620" y="493" font-family="Helvetica" font-size="10" text-anchor="middle" fill="#9673a6">AI calls</text>
+
+  <!-- Secret Manager -->
+  <rect x="680" y="600" width="180" height="70" rx="10" ry="10" fill="#f5f5f5" stroke="#999999" stroke-width="2" stroke-dasharray="4,4"/>
+  <text x="770" y="630" font-family="Helvetica" font-size="13" font-weight="bold" text-anchor="middle" fill="#999999">Secret Manager</text>
+  <text x="770" y="650" font-family="Helvetica" font-size="10" text-anchor="middle" fill="#999999">API keys · Session secret</text>
+  <text x="770" y="662" font-family="Helvetica" font-size="9" text-anchor="middle" fill="#cc0000">⏳ Needs billing</text>
+
+  <!-- Arrow: API → Secret Manager (dashed) -->
+  <path d="M 530 590 L 600 620 L 675 635" fill="none" stroke="#999999" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <path d="M 680 635 L 673 631.5 L 675 635 L 673 638.5 Z" fill="#999999" stroke="#999999" stroke-width="1.5"/>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- COLUMN 4: DEPLOYMENT TARGET -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+  <!-- Calendly -->
+  <rect x="920" y="310" width="150" height="60" rx="10" ry="10" fill="#e1d5e7" stroke="#9673a6" stroke-width="2"/>
+  <text x="995" y="340" font-family="Helvetica" font-size="13" font-weight="bold" text-anchor="middle" fill="#333333">Calendly</text>
+  <text x="995" y="358" font-family="Helvetica" font-size="10" text-anchor="middle" fill="#666666">Book a Call CTA</text>
+
+  <!-- Arrow: Report page → Calendly -->
+  <path d="M 155 478 C 200 478, 200 340, 915 340" fill="none" stroke="#9673a6" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <path d="M 920 340 L 913 336.5 L 915 340 L 913 343.5 Z" fill="#9673a6" stroke="#9673a6" stroke-width="1.5"/>
+
+  <!-- Domain box -->
+  <rect x="920" y="160" width="150" height="60" rx="10" ry="10" fill="#f5f5f5" stroke="#999999" stroke-width="2" stroke-dasharray="4,4"/>
+  <text x="995" y="187" font-family="Helvetica" font-size="12" font-weight="bold" text-anchor="middle" fill="#999999">tokenise.deca4.com</text>
+  <text x="995" y="207" font-family="Helvetica" font-size="10" text-anchor="middle" fill="#cc0000">⏳ Not yet mapped</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- FLOW DIAGRAM (bottom) -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+  <line x1="30" y1="720" x2="1070" y2="720" stroke="#e5e7eb" stroke-width="1"/>
+
+  <text x="550" y="750" font-family="Helvetica" font-size="12" text-anchor="middle" fill="#333333">
+    Flow: URL → Auth Modal → POST /proposals (scrape + AI prefill) → /questionnaire/[id] → POST /report → /report/[id] → Calendly
+  </text>
+  <text x="550" y="770" font-family="Helvetica" font-size="11" text-anchor="middle" fill="#999999">
+    Status: Code complete · GCP project + Firestore created · Billing link + deploy pending
+  </text>
+
+  <!-- Legend -->
+  <rect x="30" y="700" width="12" height="12" rx="2" ry="2" fill="#d5e8d4" stroke="#82b366" stroke-width="1"/>
+  <text x="48" y="711" font-family="Helvetica" font-size="10" fill="#666666">Created</text>
+
+  <rect x="110" y="700" width="12" height="12" rx="2" ry="2" fill="#f5f5f5" stroke="#999999" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="128" y="711" font-family="Helvetica" font-size="10" fill="#666666">Pending</text>
+
+  <rect x="200" y="700" width="12" height="12" rx="2" ry="2" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1"/>
+  <text x="218" y="711" font-family="Helvetica" font-size="10" fill="#666666">Frontend</text>
+
+  <rect x="280" y="700" width="12" height="12" rx="2" ry="2" fill="#fff2cc" stroke="#d6b656" stroke-width="1"/>
+  <text x="298" y="711" font-family="Helvetica" font-size="10" fill="#666666">Backend</text>
+
+  <rect x="360" y="700" width="12" height="12" rx="2" ry="2" fill="#e1d5e7" stroke="#9673a6" stroke-width="1"/>
+  <text x="378" y="711" font-family="Helvetica" font-size="10" fill="#666666">External</text>
+
+</svg>

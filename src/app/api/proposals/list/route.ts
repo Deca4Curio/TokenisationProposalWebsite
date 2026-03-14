@@ -2,16 +2,15 @@ import { NextResponse } from "next/server";
 import { apiRequest } from "@/lib/api-client";
 import { getSessionToken } from "@/lib/session";
 
-export async function POST(request: Request) {
+export async function GET() {
   const sessionToken = await getSessionToken();
   if (!sessionToken) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const body = await request.json();
   const data = await apiRequest<Record<string, unknown>>(
     "/proposals",
-    { method: "POST", body, sessionToken }
+    { sessionToken }
   );
 
   return NextResponse.json(data);

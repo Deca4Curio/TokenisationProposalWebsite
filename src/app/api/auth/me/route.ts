@@ -1,24 +1,17 @@
 import { NextResponse } from "next/server";
-import { getCurrentUserId } from "@/lib/auth";
-import { getDb } from "@/lib/firebase";
+import { apiRequest } from "@/lib/api-client";
+import { getSessionToken } from "@/lib/session";
 
 export async function GET() {
-  try {
-    const userId = await getCurrentUserId();
-    if (!userId) {
-      return NextResponse.json({ user: null });
-    }
-
-    const doc = await getDb().collection("users").doc(userId).get();
-    if (!doc.exists) {
-      return NextResponse.json({ user: null });
-    }
-
-    return NextResponse.json({
-      user: { id: userId, ...doc.data() },
-    });
-  } catch (error) {
-    console.error("Auth check error:", error);
+  const sessionToken = await getSessionToken();
+  if (!sessionToken) {
     return NextResponse.json({ user: null });
   }
+
+  const data = await apiRequest<{ user: unknown }>(
+    "/auth/me",
+    { sessionToken }
+  );
+
+  return NextResponse.json(data);
 }

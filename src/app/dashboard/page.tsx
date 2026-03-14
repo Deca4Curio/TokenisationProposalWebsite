@@ -40,25 +40,11 @@ export default function DashboardPage() {
         }
         setUser(authData.user);
 
-        // For MVP, we fetch proposals from the API
-        // In a full implementation, we'd have a list endpoint
-        // For now, proposals are loaded from localStorage proposal IDs
-        const storedIds = JSON.parse(localStorage.getItem("proposalIds") || "[]") as string[];
-        const loaded: Proposal[] = [];
-
-        for (const pid of storedIds) {
-          try {
-            const res = await fetch(`/api/proposals/${pid}`);
-            if (res.ok) {
-              const data = await res.json();
-              loaded.push(data.proposal);
-            }
-          } catch {
-            // Skip failed loads
-          }
+        const listRes = await fetch("/api/proposals/list");
+        if (listRes.ok) {
+          const listData = await listRes.json();
+          setProposals(listData.proposals || []);
         }
-
-        setProposals(loaded.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
       } catch {
         router.push("/");
       } finally {

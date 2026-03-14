@@ -10,7 +10,7 @@ function getApp(): App {
     if (existing.length > 0) {
       app = existing[0];
     } else {
-      const projectId = process.env.GCLOUD_PROJECT || process.env.FIREBASE_PROJECT_ID;
+      const projectId = process.env.GCLOUD_PROJECT;
       const credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
 
       if (credentials) {
@@ -19,7 +19,6 @@ function getApp(): App {
           projectId,
         });
       } else {
-        // Uses Application Default Credentials (ADC) on Cloud Run
         initializeApp({ projectId });
         app = getApps()[0];
       }

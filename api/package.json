@@ -1,0 +1,24 @@
+{
+  "name": "tokenise-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "express": "^5.1.0",
+    "firebase-admin": "^13.4.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5",
+    "@types/node": "^20",
+    "@types/uuid": "^10",
+    "tsx": "^4",
+    "typescript": "^5"
+  }
+}

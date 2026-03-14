@@ -1,4 +1,4 @@
-import type { ScrapedPage } from "@/types";
+import type { ScrapedPage } from "../types.js";
 
 const FIRECRAWL_API = "https://api.firecrawl.dev/v1";
 
@@ -45,7 +45,6 @@ export async function scrapeUrl(url: string): Promise<ScrapedPage[]> {
   }
 
   const content = result.data.markdown || result.data.content || "";
-  // Truncate to ~8000 chars to keep Claude context manageable
   const truncated = content.slice(0, 8000);
 
   return [
