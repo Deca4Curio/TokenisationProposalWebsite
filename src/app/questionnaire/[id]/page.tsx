@@ -254,7 +254,7 @@ export default function QuestionnairePage() {
             Review your proposal details
           </h1>
           <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-            Our AI pre-filled this based on{" "}
+            We pre-filled this based on{" "}
             <span className="font-mono font-medium" style={{ color: "var(--accent)" }}>
               {proposal.url.replace(/^https?:\/\//, "")}
             </span>

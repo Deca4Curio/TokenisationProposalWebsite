@@ -27,7 +27,7 @@ const HOW_IT_WORKS = [
   {
     step: "01",
     title: "Paste your website",
-    desc: "Our AI reads your business in seconds, identifying assets, revenue model, and jurisdiction.",
+    desc: "We read your business in seconds, identifying assets, revenue model, and jurisdiction.",
   },
   {
     step: "02",
@@ -318,7 +318,7 @@ export default function Home() {
           </h1>
 
           <p className="animate-fade-in-up max-w-xl text-lg opacity-0 delay-100 sm:text-xl" style={{ color: "var(--text-secondary)" }}>
-            Paste your website. Our AI reads your business, identifies tokenisable assets, models token economics, maps the regulatory framework, and delivers a complete proposal in <strong style={{ color: "var(--text-primary)" }}>90 seconds</strong>.
+            Paste your website. We read your business, identify tokenisable assets, model token economics, map the regulatory framework, and deliver a complete proposal in <strong style={{ color: "var(--text-primary)" }}>90 seconds</strong>.
           </p>
 
           {/* CTA Input */}
@@ -399,7 +399,7 @@ export default function Home() {
         <div className="mx-auto max-w-5xl px-6 sm:px-12">
           <div className="mb-16 text-center">
             <p className="mb-3 text-sm font-medium uppercase tracking-widest" style={{ color: "var(--color-purple)" }}>Your proposal includes</p>
-            <h2 className="text-3xl font-bold sm:text-4xl" style={{ color: "var(--text-primary)" }}>AI-generated, expert-reviewed</h2>
+            <h2 className="text-3xl font-bold sm:text-4xl" style={{ color: "var(--text-primary)" }}>Comprehensive, expert-reviewed</h2>
             <p className="mx-auto mt-4 max-w-lg text-sm" style={{ color: "var(--text-secondary)" }}>
               Each proposal contains 6 comprehensive sections covering every aspect of your tokenisation strategy.
             </p>

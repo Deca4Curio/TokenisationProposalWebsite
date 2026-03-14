@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Tokenise Anything | Deca4 x Curio",
   description:
-    "Paste your website. Get a custom tokenisation proposal in 90 seconds. AI analyses your business, identifies tokenisable assets, and generates a complete strategy.",
+    "Paste your website. Get a custom tokenisation proposal in 90 seconds. We analyse your business, identify tokenisable assets, and generate a complete strategy.",
   keywords:
     "tokenisation, tokenization, asset tokenisation, real estate tokenisation, blockchain, token economics, regulatory framework, Deca4, Curio",
   authors: [{ name: "Deca4 Advisory FZE" }, { name: "curioInvest" }],
@@ -23,9 +23,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "Tokenise Anything",
-    title: "Tokenise Anything | AI-Powered Tokenisation Proposals",
+    title: "Tokenise Anything | Instant Tokenisation Proposals",
     description:
-      "Paste your website. Our AI analyses your business and delivers a custom tokenisation proposal with token economics, regulatory framework, and go-to-market strategy.",
+      "Paste your website. We analyse your business and deliver a custom tokenisation proposal with token economics, regulatory framework, and go-to-market strategy.",
     url: "https://tokenise.deca4.com",
     locale: "en_US",
   },
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Tokenise Anything | Deca4 x Curio",
     description:
-      "From URL to tokenisation proposal in 90 seconds. Free, instant, AI-powered.",
+      "From URL to tokenisation proposal in 90 seconds. Free and instant.",
   },
   other: {
     "theme-color": "#00A9A5",
