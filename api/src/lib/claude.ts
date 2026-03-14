@@ -5,6 +5,20 @@ function getClient(): Anthropic {
   return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 }
 
+function cleanJsonString(text: string): string {
+  // Remove markdown code fences if present
+  let cleaned = text.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "");
+  // Try to extract JSON object or array
+  const objMatch = cleaned.match(/(\{[\s\S]*\})/);
+  const arrMatch = cleaned.match(/(\[[\s\S]*\])/);
+  if (arrMatch && (!objMatch || arrMatch.index! <= objMatch.index!)) {
+    cleaned = arrMatch[1];
+  } else if (objMatch) {
+    cleaned = objMatch[1];
+  }
+  return cleaned;
+}
+
 export async function prefillQuestionnaire(
   url: string,
   scrapedContent: ScrapedPage[]
@@ -25,17 +39,17 @@ Website URL: ${url}
 Website content:
 ${siteContent}
 
-Respond with ONLY a JSON object (no markdown, no explanation) with these fields:
+Respond with ONLY a valid JSON object. No markdown, no explanation, no code fences. Ensure all strings are properly escaped. Fields:
 {
-  "companyName": "string - company name from the website",
-  "industry": "string - primary industry (e.g. Real Estate, Technology, Energy, Agriculture, Infrastructure, Finance)",
-  "jurisdiction": "string - likely jurisdiction based on content (e.g. UAE - DIFC, UAE - ADGM, Switzerland, Singapore, USA)",
-  "assetTypes": ["array of strings - types of assets that could be tokenised"],
-  "estimatedValue": "string - estimated asset value if mentioned, otherwise 'To be determined'",
-  "revenueModel": "string - business revenue model",
-  "targetInvestors": "string - likely target investors",
-  "tokenStandard": "string - recommended token standard (e.g. ERC-20, ERC-1400, ERC-3643)",
-  "regulatoryNotes": "string - key regulatory considerations"
+  "companyName": "company name from the website",
+  "industry": "primary industry",
+  "jurisdiction": "likely jurisdiction",
+  "assetTypes": ["array of tokenisable asset types"],
+  "estimatedValue": "estimated asset value or To be determined",
+  "revenueModel": "business revenue model",
+  "targetInvestors": "likely target investors",
+  "tokenStandard": "recommended token standard",
+  "regulatoryNotes": "key regulatory considerations"
 }`,
       },
     ],
@@ -43,10 +57,14 @@ Respond with ONLY a JSON object (no markdown, no explanation) with these fields:
 
   const text =
     response.content[0].type === "text" ? response.content[0].text : "";
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error("Claude did not return valid JSON");
 
-  return JSON.parse(jsonMatch[0]) as Questionnaire;
+  try {
+    const cleaned = cleanJsonString(text);
+    return JSON.parse(cleaned) as Questionnaire;
+  } catch (e) {
+    console.error("Failed to parse questionnaire JSON:", text.slice(0, 500));
+    throw new Error("AI returned invalid JSON for questionnaire");
+  }
 }
 
 export async function generateReport(
@@ -61,7 +79,7 @@ export async function generateReport(
     messages: [
       {
         role: "user",
-        content: `You are a senior tokenisation advisor at Deca4 Advisory, a blockchain consulting firm based in Dubai. Generate a comprehensive tokenisation proposal based on this information.
+        content: `You are a senior tokenisation advisor at Deca4 Advisory, a blockchain consulting firm based in Dubai. Generate a comprehensive tokenisation proposal.
 
 Company: ${questionnaire.companyName}
 Website: ${url}
@@ -74,26 +92,30 @@ Target Investors: ${questionnaire.targetInvestors}
 Token Standard: ${questionnaire.tokenStandard}
 Regulatory Notes: ${questionnaire.regulatoryNotes}
 
-Generate a proposal with exactly 6 sections. Respond with ONLY a JSON array (no markdown wrapping, no explanation):
+Generate a proposal with exactly 6 sections. Each section should have 300-500 words.
+
+CRITICAL: Respond with ONLY a valid JSON array. No markdown code fences, no extra text. All strings must be properly JSON-escaped (use \\n for newlines within content, escape quotes with \\"). Use plain text with dashes for bullet points, not markdown.
 
 [
-  { "title": "Asset Analysis", "content": "markdown content - Detailed analysis of tokenisable assets, valuation approach, and asset structure recommendations" },
-  { "title": "Token Economics", "content": "markdown content - Token supply, pricing mechanism, distribution schedule, vesting, and liquidity strategy" },
-  { "title": "Regulatory Framework", "content": "markdown content - Jurisdiction-specific compliance, entity structure, licensing, and regulatory roadmap" },
-  { "title": "Smart Contract Architecture", "content": "markdown content - Token standard rationale, on-chain logic, security considerations, and integration plan" },
-  { "title": "Go-to-Market Strategy", "content": "markdown content - Investor targeting, distribution channels, marketing plan, and launch timeline" },
-  { "title": "Financial Projections", "content": "markdown content - Fundraise modelling, cost breakdown, ROI scenarios, and 3-year projections" }
-]
-
-Make each section 300-500 words with specific, actionable insights. Use markdown formatting within content.`,
+  {"title": "Asset Analysis", "content": "detailed analysis text here"},
+  {"title": "Token Economics", "content": "token economics text here"},
+  {"title": "Regulatory Framework", "content": "regulatory text here"},
+  {"title": "Smart Contract Architecture", "content": "smart contract text here"},
+  {"title": "Go-to-Market Strategy", "content": "go to market text here"},
+  {"title": "Financial Projections", "content": "financial projections text here"}
+]`,
       },
     ],
   });
 
   const text =
     response.content[0].type === "text" ? response.content[0].text : "";
-  const jsonMatch = text.match(/\[[\s\S]*\]/);
-  if (!jsonMatch) throw new Error("Claude did not return valid JSON array");
 
-  return JSON.parse(jsonMatch[0]) as ReportSection[];
+  try {
+    const cleaned = cleanJsonString(text);
+    return JSON.parse(cleaned) as ReportSection[];
+  } catch (e) {
+    console.error("Failed to parse report JSON:", text.slice(0, 500));
+    throw new Error("AI returned invalid JSON for report");
+  }
 }
