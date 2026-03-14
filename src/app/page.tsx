@@ -347,7 +347,7 @@ export default function Home() {
             <span>Proposal in 90 seconds</span>
           </p>
 
-          <a href="https://calendly.com/deca4" target="_blank" rel="noopener noreferrer" className="animate-fade-in-up text-xs opacity-0 delay-400 transition-colors hover:underline" style={{ color: "var(--text-muted)" }}>
+          <a href="https://calend.ly/rfv" target="_blank" rel="noopener noreferrer" className="animate-fade-in-up text-xs opacity-0 delay-400 transition-colors hover:underline" style={{ color: "var(--text-muted)" }}>
             or schedule a consultation →
           </a>
         </div>
@@ -482,7 +482,7 @@ export default function Home() {
               style={{ boxShadow: "0 4px 20px var(--glow-color)" }}>
               Generate Proposal →
             </button>
-            <a href="https://calendly.com/deca4" target="_blank" rel="noopener noreferrer" className="rounded-xl px-8 py-4 text-base font-medium transition-all"
+            <a href="https://calend.ly/rfv" target="_blank" rel="noopener noreferrer" className="rounded-xl px-8 py-4 text-base font-medium transition-all"
               style={{ border: "1px solid var(--border)", color: "var(--text-secondary)", background: "var(--bg-card)" }}>
               Schedule a Call
             </a>

@@ -7,7 +7,7 @@ import ReportView from "@/components/ReportView";
 import AnalysisProgress from "@/components/AnalysisProgress";
 import type { Proposal } from "@/types";
 
-const CALENDLY_URL = "https://calendly.com/deca4";
+const CALENDLY_URL = "https://calend.ly/rfv";
 
 function useTheme() {
   const [dark, setDark] = useState(true);
