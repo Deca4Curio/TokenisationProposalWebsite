@@ -101,14 +101,10 @@ router.post("/", async (req, res) => {
 });
 
 // GET /proposals/:id
+// Public access for completed reports (shareable links).
+// Auth-gated for in-progress reports (owner only).
 router.get("/:id", async (req, res) => {
   try {
-    const userId = await getUserId(req);
-    if (!userId) {
-      res.status(401).json({ error: "Not authenticated" });
-      return;
-    }
-
     const doc = await getDb().collection("proposals").doc(req.params.id).get();
     if (!doc.exists) {
       res.status(404).json({ error: "Not found" });
@@ -116,6 +112,19 @@ router.get("/:id", async (req, res) => {
     }
 
     const data = doc.data()!;
+
+    // Completed reports are publicly accessible
+    if (data.status === "report_ready") {
+      res.json({ proposal: { id: doc.id, ...data } });
+      return;
+    }
+
+    // In-progress reports require auth + ownership
+    const userId = await getUserId(req);
+    if (!userId) {
+      res.status(401).json({ error: "Not authenticated" });
+      return;
+    }
     if (data.userId !== userId) {
       res.status(403).json({ error: "Forbidden" });
       return;

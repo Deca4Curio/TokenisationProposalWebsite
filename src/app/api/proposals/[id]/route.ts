@@ -7,14 +7,12 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const sessionToken = await getSessionToken();
-  if (!sessionToken) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
-
   const { id } = await params;
+
+  // Pass session token if available; the API handles public vs auth-gated access
   const data = await apiRequest<Record<string, unknown>>(
     `/proposals/${id}`,
-    { sessionToken }
+    { ...(sessionToken ? { sessionToken } : {}) }
   );
 
   return NextResponse.json(data);

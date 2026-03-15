@@ -38,11 +38,11 @@ export default function ReportPage() {
       try {
         const res = await fetch(`/api/proposals/${id}`);
         if (!res.ok) {
-          if (res.status === 401) {
-            router.push("/");
-            return;
+          if (res.status === 401 || res.status === 403) {
+            setError("This report is not available. It may still be generating.");
+          } else {
+            setError("Failed to load report");
           }
-          setError("Failed to load report");
           return;
         }
         const data = await res.json();
