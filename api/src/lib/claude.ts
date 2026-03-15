@@ -54,33 +54,36 @@ function extractSectionsFromToolUse(response: Anthropic.Messages.Message): Repor
 }
 
 const CASE_STUDY_BANK = `
-CASE STUDY REFERENCE BANK (use relevant examples based on asset class):
+CASE STUDY REFERENCE BANK — Use selectively. Only cite cases that are GENUINELY comparable to the client's risk profile, jurisdiction type, and asset class. If citing a case from a different risk tier (e.g. US Treasuries vs frontier-market assets), explicitly acknowledge the difference. If no close comparable exists, say so honestly and explain what makes this opportunity novel.
+
 - Gold/Commodities: CurioInvest XAUH token, backed by physical gold in Swiss vaults, traded on secondary markets
 - Real Estate: RealT (tokenised US rental properties, $100M+ tokenised), Propy (on-chain property transfers)
 - Equity/Securities: Securitize (SEC-registered, $1B+ tokenised), tZERO (regulated ATS for security tokens)
 - Bonds/Debt: European Investment Bank (€100M digital bond on Ethereum), Obligate (on-chain corporate bonds)
 - Funds: BlackRock BUIDL (tokenised Treasury fund, $500M+ AUM), Franklin Templeton (on-chain money market fund)
 - Art/Collectibles: Masterworks (fractional blue-chip art), Maecenas (blockchain art investment)
+- Frontier/Emerging Markets: Note that large-scale tokenisation of frontier-market assets is still nascent. Be honest about this — it is a first-mover opportunity but also an execution risk.
 `;
 
 const PARTNER_CREDENTIALS = `
-PARTNER CREDENTIALS (use in "Your Partners" section):
+PARTNER CREDENTIALS (use in "Your Partners" section). Lead with COMPLETED transactions, not pipeline. Be specific. Acknowledge where local partners or additional advisors may be needed for the client's jurisdiction.
 
-CurioInvest:
-- Launched XAUH: first gold-backed token with Swiss vault custody
+CurioInvest (completed transactions first):
+- Launched XAUH: first gold-backed token with Swiss vault custody — live and trading on secondary markets
+- Issued first tokenised corporate bond in Switzerland — full lifecycle from issuance to secondary trading
+- CHF 1B mortgage-backed securities tokenisation pipeline (in progress, not yet completed)
+- Operating since 2018, regulated in Liechtenstein (EU-passportable)
 - Featured in Forbes, Bloomberg, CoinDesk
-- Issued first tokenised corporate bond in Switzerland
-- CHF 1B mortgage-backed securities tokenisation pipeline
-- Operating since 2018, regulated in Liechtenstein
 - Legal counsel: LEXR (leading Swiss blockchain law firm)
 
-Deca4 Advisory:
+Deca4 Advisory (engagements first):
+- RAK Digital Assets Oasis: land registry tokenisation pilot with government endorsement
+- TDRA: blockchain regulatory assessment for telecommunications authority
+- DIFC Courts: digital evidence & smart contract dispute resolution programme
 - Headquarters: Dubai World Trade Centre, UAE
-- RAK Digital Assets Oasis: land registry tokenisation (pilot)
-- TDRA (Telecommunications & Digital Government Regulatory Authority): blockchain assessment
-- DIFC Courts: digital evidence & smart contract dispute resolution
 - $1B+ combined tokenisation pipeline across 6 jurisdictions
 - Team: blockchain architects, compliance specialists, financial structuring experts
+- NOTE: For jurisdictions outside UAE/EU/Switzerland, Deca4 engages local legal counsel and regulatory advisors as part of the programme
 `;
 
 const FORMATTING_RULES = `
@@ -88,26 +91,47 @@ FORMATTING RULES:
 - Use **Bold Label:** Value pairs on consecutive lines for key metrics (3+ in a row)
 - Use - **Title:** Description for feature/item lists (2+ items)
 - Use | Col | Col | tables with --- separator rows for comparisons
-- Use **Phase N:** or **Month N-N:** on consecutive lines for timelines
+- Use **Phase N (Month X-Y):** Title followed by a description paragraph on a new line for timelines
 - Use ## Subheading for sub-sections within a section
 - Use > for important quotes or key takeaways
 - Use **Note:** or **Key Insight:** to start callout paragraphs
 - Mix prose paragraphs between structured elements for readability
 
 SECTION-SPECIFIC GUIDANCE:
-1. Executive Summary: Start with a compelling prose paragraph about the opportunity. Use **bold:** value pairs for 3-5 headline numbers (estimated value, potential raise, projected ROI, timeline). End with a > blockquote giving a clear recommendation.
 
-2. Tokenisation Opportunities: Use - **Opportunity:** Description cards for each opportunity mapped to their business objectives. Use **bold:** value pairs for goal-to-opportunity mapping. Prose explaining how tokenisation addresses each stated objective.
+1. Executive Summary: Start with a compelling prose paragraph framing the business opportunity (not the technology). If financial data was provided, use **bold:** value pairs for 3-5 headline numbers. If financial data is missing or "To be determined," state the opportunity qualitatively and include a **Note:** callout listing what data is needed for quantification (e.g. "A formal asset valuation would allow us to quantify the capital raise target"). End with a > blockquote giving an honest recommendation.
 
-3. Market Validation: Use a | table | for case study comparisons (project, asset class, amount tokenised, outcome). Use **bold:** value pairs for market data points. Use > for a testimonial or key market quote.
+2. Tokenisation Opportunities: Map specific opportunities to the client's stated business objectives. Use - **Opportunity:** Description cards for each. Explain concretely how tokenisation addresses each objective using the client's actual business context (their industry, their assets). Do not describe generic tokenisation benefits.
 
-4. Implementation Plan: Use **Phase N:** timeline for implementation phases (legal structuring, token design, compliance, distribution, launch). Use - **Component:** Description cards for key workstreams.
+3. Market Validation: Use a | table | for case study comparisons. CRITICAL: Only cite cases genuinely comparable in risk profile. If the client operates in a frontier market and the best comparables are from developed markets, explicitly acknowledge the difference: "While no direct comparable exists for [jurisdiction], the closest precedents are...". Use **bold:** value pairs for market data with cited sources. Use > for a relevant quote. Do NOT use quotes from figures discussing entirely different asset classes (e.g. Larry Fink on US Treasuries is not relevant to DRC mining assets).
 
-5. Financial Outlook: Use a | table | for year-by-year projections. Use **bold:** value pairs for key metrics (capital raised, liquidity unlocked, revenue, ROI). Include a comparison | table | of traditional vs tokenised approach costs.
+4. Implementation Plan: Use **Phase N (Month X-Y): Title** on one line, followed by a description paragraph on the next line. Each phase should include key deliverables AND key risks for that phase. Use - **Workstream:** Description cards for parallel workstreams. Include a **Note:** callout about jurisdiction-specific regulatory requirements and any additional local advisors needed.
 
-6. Opportunity Cost: Use **bold:** value pairs for cost-of-waiting drivers (locked liquidity per month, missed investor pool size, competitor moves). Include a comparison | table | showing "Act Now" vs "Wait 12 Months" scenarios. End with a **Key Insight:** callout on urgency.
+5. Financial Outlook: ALL projections must be clearly labeled as "Illustrative" or "Subject to formal valuation." Show the methodology: "Assuming an asset base of X, a typical first issuance of 10-20% would yield...". Use a | table | for projections with a column for assumptions. Include a comparison | table | of traditional vs tokenised costs — but include the full cost of the tokenised route (advisory fees, platform fees, legal, ongoing). Include a downside scenario: "If the raise achieves only 30-50% of target...". If estimatedValue is "To be determined" or vague, use conditional language throughout: "Subject to valuation, if..." and do NOT present any figure as a forecast.
 
-7. Your Partners: Use - **Credential:** Description cards for CurioInvest and Deca4 credentials. Use > for a testimonial quote. Use **bold:** value pairs for track record stats.`;
+6. Opportunity Cost: Present a BALANCED risk-benefit analysis. Yes, show the cost of inaction — but also honestly acknowledge the risks of proceeding (execution risk, regulatory risk, reputational risk of being a first mover). Do NOT fabricate specific dollar amounts for "locked liquidity per month" unless derived from actual data. Use a comparison | table | showing "Proceed" vs "Defer" with BOTH benefits and risks for each path. Name specific competitors only if they actually exist — do not manufacture competitive threats. End with an honest **Key Insight:** that weighs both sides.
+
+7. Your Partners: Lead with COMPLETED transactions, not pipeline (distinguish clearly). Use - **Credential:** Description cards. Acknowledge where local expertise will be brought in for the client's specific jurisdiction. Use > for a quote attributed to a named person, not "Leadership Team." Use **bold:** value pairs for track record stats.`;
+
+function assessDataQuality(questionnaire: Questionnaire): string {
+  const gaps: string[] = [];
+  const ev = questionnaire.estimatedValue?.trim().toLowerCase() || "";
+  if (!ev || ev === "to be determined" || ev === "tbd" || ev === "n/a") {
+    gaps.push("ESTIMATED VALUE is unknown — do NOT invent specific financial projections. Use conditional language: 'Subject to formal valuation, if the asset base is in the range of X...'");
+  }
+  if (!questionnaire.businessObjectives?.length && !questionnaire.assetTypes?.length) {
+    gaps.push("NO BUSINESS OBJECTIVES or ASSET TYPES specified — keep recommendations general and focus on the assessment framework rather than specific opportunities");
+  }
+  if (!questionnaire.biggestChallenge?.trim()) {
+    gaps.push("BIGGEST CHALLENGE not provided — base your analysis on public information and industry-typical challenges for this jurisdiction/industry");
+  }
+  const notes = questionnaire.regulatoryNotes || "";
+  if (!notes.includes("Existing structure:") || notes.includes("Existing structure: \n") || notes.includes("Existing structure:\n")) {
+    gaps.push("NO EXISTING LEGAL STRUCTURE disclosed — do not assume an SPV or holding company exists. Recommend structuring as part of Phase 1");
+  }
+  if (gaps.length === 0) return "";
+  return `\nDATA QUALITY ASSESSMENT — The following information gaps exist. You MUST handle these honestly:\n${gaps.map(g => `- ${g}`).join("\n")}\n`;
+}
 
 function buildReportPrompt(url: string, questionnaire: Questionnaire): string {
   const objectives = questionnaire.businessObjectives?.length
@@ -121,8 +145,13 @@ function buildReportPrompt(url: string, questionnaire: Questionnaire): string {
     ? `Biggest Challenge: ${questionnaire.biggestChallenge}`
     : "";
 
-  return `You are a senior tokenisation advisor writing a report for a business executive who may not understand blockchain. Your job is to show them the business opportunity, prove it works, explain how it would work for them, quantify the returns, show the cost of inaction, and position CurioInvest + Deca4 as the right partners.
+  const dataQuality = assessDataQuality(questionnaire);
 
+  return `You are a senior tokenisation advisor writing an advisory assessment for a company's management team. This is NOT an investor offering document — it is an honest evaluation of whether and how tokenisation could serve this company's business objectives.
+
+Your credibility depends on intellectual honesty. Where data is missing, say so. Where risks exist, name them. Where projections require assumptions, state the assumptions explicitly. A report that acknowledges uncertainty is far more persuasive to a CEO/CFO than one that fabricates confidence.
+
+COMPANY DETAILS:
 Company: ${questionnaire.companyName}
 Website: ${url}
 Industry: ${questionnaire.industry}
@@ -133,6 +162,14 @@ Revenue Model: ${questionnaire.revenueModel}
 Target Investors: ${questionnaire.targetInvestors}
 Regulatory Notes: ${questionnaire.regulatoryNotes}
 ${challengeBlock}
+${dataQuality}
+CRITICAL RULES:
+1. NEVER fabricate specific financial figures. If asset value is unknown, use illustrative scenarios: "If the tokenisable asset base is USD X, then..."
+2. Address jurisdiction-specific regulatory risks honestly. "${questionnaire.jurisdiction}" has specific legal, political, currency, and enforcement characteristics — name them. Do not treat the jurisdiction only as a selling point.
+3. Every financial projection must show its assumptions. Label illustrative figures as "Illustrative" or "Assumes...".
+4. Acknowledge risks alongside opportunities in every section. The Implementation Plan must include regulatory and execution risks. The Financial Outlook must include a downside scenario.
+5. When citing case studies, only use genuinely comparable examples. If the best comparables are from very different jurisdictions or risk profiles, acknowledge the difference explicitly.
+6. Include "Information Needed" callouts where critical data gaps prevent proper assessment.
 
 ${CASE_STUDY_BANK}
 ${PARTNER_CREDENTIALS}
@@ -143,7 +180,7 @@ ${FORMATTING_RULES}
 
 Use the submit_report tool to return your report. The 7 section titles must be exactly: "Executive Summary", "Tokenisation Opportunities", "Market Validation", "Implementation Plan", "Financial Outlook", "Opportunity Cost", "Your Partners".
 
-IMPORTANT TONE: Write for a CEO/CFO, not a blockchain developer. Lead with business outcomes, not technical mechanisms. Use "tokenisation" as a means to an end (capital, liquidity, access), never as the goal itself.`;
+TONE: Write for a CEO/CFO who is smart, busy, and skeptical. Lead with business outcomes, not blockchain mechanics. Use "tokenisation" as a means to an end (capital, liquidity, access), never as the goal itself. Be the advisor they trust because you tell them what they need to hear, not what they want to hear.`;
 }
 
 export async function prefillQuestionnaire(
@@ -280,6 +317,8 @@ export async function refineReport(
     ? `Biggest Challenge: ${updatedQuestionnaire.biggestChallenge}`
     : "";
 
+  const dataQuality = assessDataQuality(updatedQuestionnaire);
+
   const response = await client.messages.create({
     model: REPORT_MODEL,
     max_tokens: 12000,
@@ -288,7 +327,7 @@ export async function refineReport(
     messages: [
       {
         role: "user",
-        content: `You are a senior tokenisation advisor writing for a business executive. You previously generated a tokenisation report for ${updatedQuestionnaire.companyName} (${url}).
+        content: `You are a senior tokenisation advisor writing an honest advisory assessment. You previously generated a report for ${updatedQuestionnaire.companyName} (${url}).
 
 The client has updated their details. Here are the changes:
 ${changesSummary}
@@ -303,18 +342,20 @@ Revenue Model: ${updatedQuestionnaire.revenueModel}
 Target Investors: ${updatedQuestionnaire.targetInvestors}
 Regulatory Notes: ${updatedQuestionnaire.regulatoryNotes}
 ${challengeBlock}
-
+${dataQuality}
 ${PARTNER_CREDENTIALS}
 
 Here is the existing draft report:
 ${existingReportText}
 
 Update the report to reflect the changes above. Keep sections that are unaffected by the changes largely intact. Only rewrite sections that are materially impacted. Maintain the same quality and depth.
+
+CRITICAL: Never fabricate specific financial figures. Where data is missing, use conditional/illustrative language. Address jurisdiction-specific risks honestly. Acknowledge data gaps with "Information Needed" callouts.
 ${FORMATTING_RULES}
 
 Use the submit_report tool to return all 7 updated sections. The 7 section titles must be exactly: "Executive Summary", "Tokenisation Opportunities", "Market Validation", "Implementation Plan", "Financial Outlook", "Opportunity Cost", "Your Partners".
 
-IMPORTANT TONE: Write for a CEO/CFO, not a blockchain developer. Lead with business outcomes, not technical mechanisms.`,
+TONE: Write for a skeptical CEO/CFO. Lead with business outcomes, not blockchain mechanics. Be the advisor they trust.`,
       },
     ],
   });
