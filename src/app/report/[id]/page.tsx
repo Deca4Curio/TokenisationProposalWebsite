@@ -92,15 +92,15 @@ export default function ReportPage() {
 
   // Report ready
   return (
-    <div className="min-h-screen px-6 py-12" style={{ background: "var(--bg)" }}>
+    <div className="min-h-screen px-4 py-6 sm:px-6 sm:py-12" style={{ background: "var(--bg)" }}>
       <div className="mx-auto max-w-6xl">
         {/* Nav */}
-        <div className="report-nav mb-8 flex items-center justify-between">
-          <PartnerLogos dark={dark} />
-          <div className="flex items-center gap-4">
+        <div className="report-nav mb-6 flex items-center justify-between sm:mb-8">
+          <PartnerLogos dark={dark} size="sm" />
+          <div className="flex items-center gap-3 sm:gap-4">
             <button
               onClick={() => router.push("/dashboard")}
-              className="text-sm transition-colors hover:underline"
+              className="text-xs transition-colors hover:underline sm:text-sm"
               style={{ color: "var(--text-secondary)" }}
             >
               Dashboard
@@ -133,10 +133,10 @@ export default function ReportPage() {
           <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
             Book a consultation with our tokenisation advisors to discuss your report and next steps.
           </p>
-          <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          <div className="mt-6 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
             <button
               onClick={() => window.print()}
-              className="rounded-xl px-8 py-4 text-base font-medium transition-all"
+              className="rounded-xl px-6 py-3 text-sm font-medium transition-all sm:px-8 sm:py-4 sm:text-base"
               style={{ border: "1px solid var(--border)", color: "var(--text-secondary)", background: "var(--bg-card)" }}
             >
               Download PDF
@@ -145,14 +145,14 @@ export default function ReportPage() {
               href={CALENDLY_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-xl bg-[var(--color-teal)] px-8 py-4 text-base font-semibold text-white transition-all hover:shadow-lg active:scale-95"
+              className="rounded-xl bg-[var(--color-teal)] px-6 py-3 text-center text-sm font-semibold text-white transition-all hover:shadow-lg active:scale-95 sm:px-8 sm:py-4 sm:text-base"
               style={{ boxShadow: "0 4px 20px var(--glow-color)" }}
             >
               Book a Consultation
             </a>
             <a
               href="#"
-              className="rounded-xl px-8 py-4 text-base font-medium transition-all"
+              className="rounded-xl px-6 py-3 text-center text-sm font-medium transition-all sm:px-8 sm:py-4 sm:text-base"
               style={{ border: "1px solid var(--border)", color: "var(--text-secondary)", background: "var(--bg-card)" }}
             >
               Request a Quote

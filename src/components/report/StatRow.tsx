@@ -14,23 +14,23 @@ export default function StatRow({ stats }: StatRowProps) {
   if (stats.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap gap-6 sm:gap-10">
+    <div className="grid grid-cols-2 gap-4 sm:flex sm:flex-wrap sm:gap-10">
       {stats.map((stat) => (
-        <div key={stat.label} className="flex items-center gap-3">
+        <div key={stat.label} className="flex items-center gap-2 sm:gap-3">
           <div
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg sm:h-9 sm:w-9"
             style={{ background: "rgba(0,169,165,0.1)" }}
           >
             <ReportIcon name={stat.icon} size={16} className="text-[var(--accent)]" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p
-              className="text-lg font-light leading-tight"
+              className="truncate text-sm font-light leading-tight sm:text-lg"
               style={{ color: "var(--accent)", fontFamily: "var(--font-heading)" }}
             >
               {stat.value}
             </p>
-            <p className="text-[11px] uppercase tracking-wider" style={{ color: "var(--text-gray)" }}>
+            <p className="text-[10px] uppercase tracking-wider sm:text-[11px]" style={{ color: "var(--text-gray)" }}>
               {stat.label}
             </p>
           </div>
