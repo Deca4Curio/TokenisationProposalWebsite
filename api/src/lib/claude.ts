@@ -20,6 +20,39 @@ function cleanJsonString(text: string): string {
   return cleaned;
 }
 
+const REPORT_TOOL: Anthropic.Messages.Tool = {
+  name: "submit_report",
+  description: "Submit the completed tokenisation report with all 6 sections",
+  input_schema: {
+    type: "object" as const,
+    properties: {
+      sections: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            title: { type: "string", description: "Section title" },
+            content: { type: "string", description: "Section content with markdown formatting" },
+          },
+          required: ["title", "content"],
+        },
+        minItems: 6,
+        maxItems: 6,
+      },
+    },
+    required: ["sections"],
+  },
+};
+
+function extractSectionsFromToolUse(response: Anthropic.Messages.Message): ReportSection[] {
+  const toolBlock = response.content.find((b) => b.type === "tool_use");
+  if (!toolBlock || toolBlock.type !== "tool_use") {
+    throw new Error("No tool_use block in response");
+  }
+  const input = toolBlock.input as { sections: ReportSection[] };
+  return input.sections;
+}
+
 const FORMATTING_RULES = `
 FORMATTING RULES:
 - Use **Bold Label:** Value pairs on consecutive lines for key metrics (3+ in a row)
@@ -62,16 +95,7 @@ Generate a report with exactly 6 sections. Each section should have 300-500 word
 Use markdown formatting within the content strings to create visual structure:
 ${FORMATTING_RULES}
 
-CRITICAL: Respond with ONLY a valid JSON array. No markdown code fences, no extra text. All strings must be properly JSON-escaped (use \\n for newlines within content, escape quotes with \\").
-
-[
-  {"title": "Asset Analysis", "content": "detailed analysis text here"},
-  {"title": "Token Economics", "content": "token economics text here"},
-  {"title": "Regulatory Framework", "content": "regulatory text here"},
-  {"title": "Smart Contract Architecture", "content": "smart contract text here"},
-  {"title": "Go-to-Market Strategy", "content": "go to market text here"},
-  {"title": "Financial Projections", "content": "financial projections text here"}
-]`;
+Use the submit_report tool to return your report. The 6 section titles must be exactly: "Asset Analysis", "Token Economics", "Regulatory Framework", "Smart Contract Architecture", "Go-to-Market Strategy", "Financial Projections".`;
 }
 
 export async function prefillQuestionnaire(
@@ -131,6 +155,8 @@ export async function generateReport(
   const response = await client.messages.create({
     model: REPORT_MODEL,
     max_tokens: 8000,
+    tools: [REPORT_TOOL],
+    tool_choice: { type: "tool", name: "submit_report" },
     messages: [
       {
         role: "user",
@@ -139,15 +165,18 @@ export async function generateReport(
     ],
   });
 
-  const text =
-    response.content[0].type === "text" ? response.content[0].text : "";
-
   try {
-    const cleaned = cleanJsonString(text);
-    return JSON.parse(cleaned) as ReportSection[];
-  } catch {
-    console.error("Failed to parse report JSON:", text.slice(0, 500));
-    throw new Error("AI returned invalid JSON for report");
+    return extractSectionsFromToolUse(response);
+  } catch (err) {
+    // Fallback: try parsing as text JSON (in case tool_use wasn't used)
+    const text = response.content[0].type === "text" ? response.content[0].text : "";
+    try {
+      const cleaned = cleanJsonString(text);
+      return JSON.parse(cleaned) as ReportSection[];
+    } catch {
+      console.error("Failed to parse report:", err, text.slice(0, 500));
+      throw new Error("AI returned invalid JSON for report");
+    }
   }
 }
 
@@ -195,6 +224,8 @@ export async function refineReport(
   const response = await client.messages.create({
     model: REPORT_MODEL,
     max_tokens: 8000,
+    tools: [REPORT_TOOL],
+    tool_choice: { type: "tool", name: "submit_report" },
     messages: [
       {
         role: "user",
@@ -220,28 +251,21 @@ ${existingReportText}
 Update the report to reflect the changes above. Keep sections that are unaffected by the changes largely intact. Only rewrite sections that are materially impacted. Maintain the same quality and depth.
 ${FORMATTING_RULES}
 
-CRITICAL: Respond with ONLY a valid JSON array of all 6 updated sections. No markdown code fences. All strings must be properly JSON-escaped.
-
-[
-  {"title": "Asset Analysis", "content": "..."},
-  {"title": "Token Economics", "content": "..."},
-  {"title": "Regulatory Framework", "content": "..."},
-  {"title": "Smart Contract Architecture", "content": "..."},
-  {"title": "Go-to-Market Strategy", "content": "..."},
-  {"title": "Financial Projections", "content": "..."}
-]`,
+Use the submit_report tool to return all 6 updated sections. The 6 section titles must be exactly: "Asset Analysis", "Token Economics", "Regulatory Framework", "Smart Contract Architecture", "Go-to-Market Strategy", "Financial Projections".`,
       },
     ],
   });
 
-  const text =
-    response.content[0].type === "text" ? response.content[0].text : "";
-
   try {
-    const cleaned = cleanJsonString(text);
-    return JSON.parse(cleaned) as ReportSection[];
-  } catch {
-    console.error("Failed to parse refined report JSON:", text.slice(0, 500));
-    throw new Error("AI returned invalid JSON for refined report");
+    return extractSectionsFromToolUse(response);
+  } catch (err) {
+    const text = response.content[0].type === "text" ? response.content[0].text : "";
+    try {
+      const cleaned = cleanJsonString(text);
+      return JSON.parse(cleaned) as ReportSection[];
+    } catch {
+      console.error("Failed to parse refined report:", err, text.slice(0, 500));
+      throw new Error("AI returned invalid JSON for refined report");
+    }
   }
 }
