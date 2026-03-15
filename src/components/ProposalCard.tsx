@@ -5,13 +5,14 @@ import type { Proposal } from "@/types";
 import StatusBadge from "./StatusBadge";
 
 function getProposalLink(proposal: Proposal): string {
+  const reportId = proposal.slug || proposal.id;
   switch (proposal.status) {
     case "questionnaire_ready":
       return `/questionnaire/${proposal.id}`;
     case "report_ready":
-      return `/report/${proposal.id}`;
+      return `/report/${reportId}`;
     case "generating":
-      return `/report/${proposal.id}`;
+      return `/report/${reportId}`;
     default:
       return `/questionnaire/${proposal.id}`;
   }

@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Image from "next/image";
 import AnalysisProgress from "@/components/AnalysisProgress";
 import QuestionnaireWizard from "@/components/QuestionnaireWizard";
+import PartnerLogos from "@/components/PartnerLogos";
+import ThemeToggle from "@/components/ThemeToggle";
+import { useTheme } from "@/hooks/useTheme";
 import type { Proposal, Questionnaire } from "@/types";
 
 const GENERATING_PHRASES = [
@@ -20,25 +22,10 @@ const GENERATING_PHRASES = [
   "Almost there...",
 ];
 
-function useTheme() {
-  const [dark, setDark] = useState(true);
-  useEffect(() => {
-    const stored = localStorage.getItem("theme");
-    if (stored === "light") setDark(false);
-    else if (stored === "dark") setDark(true);
-    else setDark(window.matchMedia("(prefers-color-scheme: dark)").matches);
-  }, []);
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
-    localStorage.setItem("theme", dark ? "dark" : "light");
-  }, [dark]);
-  return { dark };
-}
-
 export default function QuestionnairePage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { dark } = useTheme();
+  const { dark, toggle } = useTheme();
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -102,14 +89,16 @@ export default function QuestionnairePage() {
       }
 
       const reportRes = await fetch(`/api/proposals/${id}/report`, { method: "POST" });
+      const reportData = await reportRes.json();
       if (!reportRes.ok) {
-        const data = await reportRes.json();
-        setError(data.error || "Report generation failed");
+        setError(reportData.error || "Report generation failed");
         setSubmitting(false);
         return;
       }
 
-      router.push(`/report/${id}`);
+      // Use slug for a nicer URL, fall back to UUID
+      const reportPath = reportData.slug || id;
+      router.push(`/report/${reportPath}`);
     } catch {
       setError("Network error");
       setSubmitting(false);
@@ -122,7 +111,7 @@ export default function QuestionnairePage() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-6" style={{ background: "var(--bg)" }}>
         <div className="flex w-full max-w-md flex-col items-center gap-10">
-          <PartnerLogos dark={dark} />
+          <PartnerLogos dark={dark} size="lg" />
           <AnalysisProgress url={proposal?.url || "..."} animate={true} />
         </div>
       </div>
@@ -156,7 +145,7 @@ export default function QuestionnairePage() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-6" style={{ background: "var(--bg)" }}>
         <div className="animate-scale-in flex w-full max-w-md flex-col items-center gap-10">
-          <PartnerLogos dark={dark} />
+          <PartnerLogos dark={dark} size="lg" />
 
           <div className="relative flex h-24 w-24 items-center justify-center">
             <div className="absolute inset-0 rounded-full" style={{ border: "1px solid var(--spinner-track)" }} />
@@ -197,9 +186,10 @@ export default function QuestionnairePage() {
   return (
     <div className="min-h-screen px-6 py-8 sm:py-12" style={{ background: "var(--bg)" }}>
       <div className="mx-auto max-w-2xl">
-        {/* Header logos */}
-        <div className="mb-8 flex justify-center">
-          <PartnerLogos dark={dark} />
+        {/* Header */}
+        <div className="mb-8 flex items-center justify-between">
+          <PartnerLogos dark={dark} size="lg" />
+          <ThemeToggle dark={dark} toggle={toggle} />
         </div>
 
         {error && (
@@ -222,19 +212,3 @@ export default function QuestionnairePage() {
   );
 }
 
-// ─── Shared Logo Component ───────────────────────────────────────────────────
-
-function PartnerLogos({ dark }: { dark: boolean }) {
-  return (
-    <div className="flex items-center gap-4">
-      <Image src="/logos/deca4.svg" alt="Deca4 Advisory" width={136} height={50} className="h-7 w-auto" priority />
-      <span style={{ color: "var(--text-faint)" }} className="text-lg font-light">x</span>
-      <Image
-        src="/logos/curio.svg" alt="curioInvest" width={120} height={20}
-        className={`h-5 w-auto ${dark ? "invert" : ""}`}
-        style={{ filter: dark ? "invert(1) hue-rotate(180deg)" : undefined }}
-        priority
-      />
-    </div>
-  );
-}

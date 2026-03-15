@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { randomBytes } from "crypto";
 import { v4 as uuidv4 } from "uuid";
 import { getDb } from "../lib/firebase.js";
 import { scrapeUrl } from "../lib/firecrawl.js";
@@ -6,6 +7,18 @@ import { prefillQuestionnaire, generateReport, refineReport, getChangedFields } 
 import type { Questionnaire } from "../types.js";
 
 const router = Router();
+
+function generateSlug(companyName: string): string {
+  const base = companyName
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 40);
+  const suffix = randomBytes(2).toString("hex"); // 4 hex chars
+  return base ? `${base}-${suffix}` : suffix;
+}
 
 // Helper: validate session and return userId
 async function getUserId(req: { headers: Record<string, unknown> }): Promise<string | null> {
@@ -85,15 +98,18 @@ router.post("/", async (req, res) => {
       return;
     }
 
+    const slug = generateSlug(questionnaire.companyName || "report");
+
     await db.collection("proposals").doc(proposalId).update({
       status: "questionnaire_ready",
       scrapedContent,
       siteMetadata,
       questionnaire,
+      slug,
       updatedAt: new Date().toISOString(),
     });
 
-    res.json({ proposalId, status: "questionnaire_ready", questionnaire });
+    res.json({ proposalId, slug, status: "questionnaire_ready", questionnaire });
   } catch (error) {
     console.error("Create proposal error:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -103,12 +119,23 @@ router.post("/", async (req, res) => {
 // GET /proposals/:id
 // Public access for completed reports (shareable links).
 // Auth-gated for in-progress reports (owner only).
+// Supports both UUID and slug lookup.
 router.get("/:id", async (req, res) => {
   try {
-    const doc = await getDb().collection("proposals").doc(req.params.id).get();
+    const db = getDb();
+    const paramId = req.params.id;
+
+    // Try direct UUID lookup first
+    let doc = await db.collection("proposals").doc(paramId).get();
+
+    // If not found by UUID, try slug lookup
     if (!doc.exists) {
-      res.status(404).json({ error: "Not found" });
-      return;
+      const slugSnap = await db.collection("proposals").where("slug", "==", paramId).limit(1).get();
+      if (slugSnap.empty) {
+        res.status(404).json({ error: "Not found" });
+        return;
+      }
+      doc = slugSnap.docs[0];
     }
 
     const data = doc.data()!;
@@ -332,7 +359,7 @@ router.post("/:id/report", async (req, res) => {
       updatedAt: new Date().toISOString(),
     });
 
-    res.json({ status: "report_ready", report });
+    res.json({ status: "report_ready", report, slug: data.slug });
   } catch (error) {
     console.error("Generate report error:", error);
     res.status(500).json({ error: "Internal server error" });

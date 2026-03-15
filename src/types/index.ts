@@ -88,6 +88,7 @@ export interface Proposal {
   userId: string;
   url: string;
   status: ProposalStatus;
+  slug?: string;
   siteMetadata?: SiteMetadata;
   questionnaire?: Questionnaire;
   questionnaireSubmitted?: Questionnaire;

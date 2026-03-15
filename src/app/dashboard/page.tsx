@@ -2,28 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import PartnerLogos from "@/components/PartnerLogos";
+import ThemeToggle from "@/components/ThemeToggle";
 import ProposalCard from "@/components/ProposalCard";
+import { useTheme } from "@/hooks/useTheme";
 import type { Proposal, User } from "@/types";
-
-function useTheme() {
-  const [dark, setDark] = useState(true);
-  useEffect(() => {
-    const stored = localStorage.getItem("theme");
-    if (stored === "light") setDark(false);
-    else if (stored === "dark") setDark(true);
-    else setDark(window.matchMedia("(prefers-color-scheme: dark)").matches);
-  }, []);
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
-    localStorage.setItem("theme", dark ? "dark" : "light");
-  }, [dark]);
-  return { dark, toggle: () => setDark((d) => !d) };
-}
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { dark } = useTheme();
+  const { dark, toggle } = useTheme();
   const [user, setUser] = useState<User | null>(null);
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,21 +55,15 @@ export default function DashboardPage() {
       <div className="mx-auto max-w-3xl">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
+          <PartnerLogos dark={dark} />
           <div className="flex items-center gap-4">
-            <Image src="/logos/deca4.svg" alt="Deca4" width={136} height={50} className="h-6 w-auto" priority />
-            <span style={{ color: "var(--text-faint)" }} className="font-light">x</span>
-            <Image
-              src="/logos/curio.svg" alt="Curio" width={120} height={20}
-              className={`h-4 w-auto ${dark ? "invert" : ""}`}
-              style={{ filter: dark ? "invert(1) hue-rotate(180deg)" : undefined }}
-              priority
-            />
+            {user && (
+              <span className="text-sm" style={{ color: "var(--text-muted)" }}>
+                {user.email}
+              </span>
+            )}
+            <ThemeToggle dark={dark} toggle={toggle} />
           </div>
-          {user && (
-            <span className="text-sm" style={{ color: "var(--text-muted)" }}>
-              {user.email}
-            </span>
-          )}
         </div>
 
         {/* Title */}

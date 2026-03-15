@@ -5,29 +5,17 @@ import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import ReportView from "@/components/ReportView";
 import AnalysisProgress from "@/components/AnalysisProgress";
+import PartnerLogos from "@/components/PartnerLogos";
+import ThemeToggle from "@/components/ThemeToggle";
+import { useTheme } from "@/hooks/useTheme";
 import type { Proposal } from "@/types";
 
 const CALENDLY_URL = "https://calend.ly/rfv";
 
-function useTheme() {
-  const [dark, setDark] = useState(true);
-  useEffect(() => {
-    const stored = localStorage.getItem("theme");
-    if (stored === "light") setDark(false);
-    else if (stored === "dark") setDark(true);
-    else setDark(window.matchMedia("(prefers-color-scheme: dark)").matches);
-  }, []);
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
-    localStorage.setItem("theme", dark ? "dark" : "light");
-  }, [dark]);
-  return { dark, toggle: () => setDark((d) => !d) };
-}
-
 export default function ReportPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { dark } = useTheme();
+  const { dark, toggle } = useTheme();
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [error, setError] = useState("");
 
@@ -75,16 +63,7 @@ export default function ReportPage() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-6" style={{ background: "var(--bg)" }}>
         <div className="flex w-full max-w-md flex-col items-center gap-10">
-          <div className="flex items-center gap-4">
-            <Image src="/logos/deca4.svg" alt="Deca4" width={136} height={50} className="h-7 w-auto" priority />
-            <span style={{ color: "var(--text-faint)" }} className="text-lg font-light">x</span>
-            <Image
-              src="/logos/curio.svg" alt="Curio" width={120} height={20}
-              className={`h-5 w-auto ${dark ? "invert" : ""}`}
-              style={{ filter: dark ? "invert(1) hue-rotate(180deg)" : undefined }}
-              priority
-            />
-          </div>
+          <PartnerLogos dark={dark} size="lg" />
           <AnalysisProgress url={proposal.url} animate={true} />
           <p className="text-center text-sm" style={{ color: "var(--text-secondary)" }}>
             Generating your tokenisation report...
@@ -117,23 +96,17 @@ export default function ReportPage() {
       <div className="mx-auto max-w-6xl">
         {/* Nav */}
         <div className="report-nav mb-8 flex items-center justify-between">
+          <PartnerLogos dark={dark} />
           <div className="flex items-center gap-4">
-            <Image src="/logos/deca4.svg" alt="Deca4" width={136} height={50} className="h-6 w-auto" priority />
-            <span style={{ color: "var(--text-faint)" }} className="font-light">x</span>
-            <Image
-              src="/logos/curio.svg" alt="Curio" width={120} height={20}
-              className={`h-4 w-auto ${dark ? "invert" : ""}`}
-              style={{ filter: dark ? "invert(1) hue-rotate(180deg)" : undefined }}
-              priority
-            />
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="text-sm transition-colors hover:underline"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              Dashboard
+            </button>
+            <ThemeToggle dark={dark} toggle={toggle} />
           </div>
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="text-sm transition-colors hover:underline"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            Dashboard
-          </button>
         </div>
 
         {proposal.report && (

@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import AuthModal from "@/components/AuthModal";
 import AnalysisProgress from "@/components/AnalysisProgress";
+import PartnerLogos from "@/components/PartnerLogos";
+import ThemeToggle from "@/components/ThemeToggle";
+import { useTheme } from "@/hooks/useTheme";
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -98,60 +100,6 @@ const AUDIENCE_TABS = [
     ],
   },
 ];
-
-// ─── Theme ───────────────────────────────────────────────────────────────────
-
-function useTheme() {
-  const [dark, setDark] = useState(true);
-
-  useEffect(() => {
-    const stored = localStorage.getItem("theme");
-    if (stored === "light") setDark(false);
-    else if (stored === "dark") setDark(true);
-    else setDark(window.matchMedia("(prefers-color-scheme: dark)").matches);
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
-    localStorage.setItem("theme", dark ? "dark" : "light");
-  }, [dark]);
-
-  return { dark, toggle: () => setDark((d) => !d) };
-}
-
-function ThemeToggle({ dark, toggle }: { dark: boolean; toggle: () => void }) {
-  return (
-    <button
-      onClick={toggle}
-      aria-label="Toggle theme"
-      className="flex h-9 w-9 items-center justify-center rounded-full border transition-all"
-      style={{ borderColor: "var(--border)", background: "var(--bg-card)", color: "var(--text-muted)" }}
-    >
-      {dark ? (
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-      ) : (
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-      )}
-    </button>
-  );
-}
-
-// ─── Logos ────────────────────────────────────────────────────────────────────
-
-function PartnerLogos({ dark }: { dark: boolean }) {
-  return (
-    <div className="flex items-center gap-4">
-      <Image src="/logos/deca4.svg" alt="Deca4 Advisory" width={136} height={50} className="h-7 w-auto" priority />
-      <span style={{ color: "var(--text-faint)" }} className="text-lg font-light">x</span>
-      <Image
-        src="/logos/curio.svg" alt="curioInvest" width={120} height={20}
-        className={`h-5 w-auto ${dark ? "invert" : ""}`}
-        style={{ filter: dark ? "invert(1) hue-rotate(180deg)" : undefined }}
-        priority
-      />
-    </div>
-  );
-}
 
 // ─── Main ────────────────────────────────────────────────────────────────────
 
@@ -263,7 +211,7 @@ export default function Home() {
       <div className="flex min-h-screen flex-col items-center justify-center bg-mesh px-6" style={{ background: "var(--bg)" }}>
         <div className="absolute right-4 top-4"><ThemeToggle dark={dark} toggle={toggle} /></div>
         <div className="animate-scale-in flex w-full max-w-md flex-col items-center gap-10">
-          <PartnerLogos dark={dark} />
+          <PartnerLogos dark={dark} size="lg" />
           <AnalysisProgress url={url} animate={true} />
         </div>
       </div>
@@ -295,7 +243,7 @@ export default function Home() {
 
       {/* Nav */}
       <nav className="sticky top-0 z-50 flex w-full items-center justify-between px-6 py-4 backdrop-blur-lg sm:px-12" style={{ borderBottom: "1px solid var(--border)", background: dark ? "rgba(5,5,7,0.85)" : "rgba(255,255,255,0.88)" }}>
-        <PartnerLogos dark={dark} />
+        <PartnerLogos dark={dark} size="lg" />
         <div className="flex items-center gap-5">
           {userId ? (
             <>
@@ -610,7 +558,7 @@ export default function Home() {
       {/* Footer */}
       <footer style={{ borderTop: "1px solid var(--section-border)" }} className="px-6 py-10">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-6 sm:flex-row">
-          <PartnerLogos dark={dark} />
+          <PartnerLogos dark={dark} size="lg" />
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>
             Deca4 Advisory FZE &middot; Dubai World Trade Center &middot; info@deca4.com
           </p>
