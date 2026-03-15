@@ -150,13 +150,13 @@ export default function ReportPage() {
             >
               Book a Consultation
             </a>
-            <a
-              href="#"
+            <button
+              onClick={() => router.push(`/quote/${proposal.id}`)}
               className="rounded-xl px-6 py-3 text-center text-sm font-medium transition-all sm:px-8 sm:py-4 sm:text-base"
               style={{ border: "1px solid var(--border)", color: "var(--text-secondary)", background: "var(--bg-card)" }}
             >
               Request a Quote
-            </a>
+            </button>
           </div>
         </div>
 

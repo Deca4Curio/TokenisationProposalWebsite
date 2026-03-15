@@ -2,6 +2,7 @@ import express from "express";
 import { validateApiSecret } from "./middleware.js";
 import authRoutes from "./routes/auth.js";
 import proposalRoutes from "./routes/proposals.js";
+import quoteRoutes from "./routes/quotes.js";
 
 const app = express();
 const port = parseInt(process.env.PORT || "8080");
@@ -17,6 +18,7 @@ app.get("/health", (_req, res) => {
 app.use(validateApiSecret);
 app.use("/auth", authRoutes);
 app.use("/proposals", proposalRoutes);
+app.use("/quotes", quoteRoutes);
 
 app.listen(port, () => {
   console.log(`Tokenise API listening on port ${port}`);
