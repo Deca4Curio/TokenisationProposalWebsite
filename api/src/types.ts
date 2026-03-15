@@ -58,3 +58,40 @@ export interface Proposal {
   createdAt: string;
   updatedAt: string;
 }
+
+// ─── Quote Flow ─────────────────────────────────────────────────────────────
+
+export type QuoteStatus =
+  | "draft"
+  | "confirmed"
+  | "discovery_requested"
+  | "call_redirected"
+  | "pipeline_submitted";
+
+export type QuotePath = "priced" | "call" | "success";
+
+export interface Quote {
+  id: string;
+  proposalId: string;
+  userId: string;
+  status: QuoteStatus;
+  path?: QuotePath;
+  companyName: string;
+  companyUrl: string;
+  assetClass: string;
+  assetValueRange: string;
+  assetValueMid: number;
+  estimatedLiquidityUnlock: number;
+  geography: string;
+  primaryGoal: string;
+  recipientName: string;
+  recipientEmail: string;
+  recipientRole: string;
+  coBrand: "curioinvest" | "curioinvest_deca4";
+  discoveryPrice?: number;
+  earlyBirdDeadline?: string;
+  successFeePct?: number;
+  successFeeAmount?: number;
+  createdAt: string;
+  updatedAt: string;
+}

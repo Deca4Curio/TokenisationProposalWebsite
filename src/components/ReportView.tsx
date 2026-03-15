@@ -49,18 +49,18 @@ function renderBlock(block: ContentBlock, index: number) {
     case "stats": {
       const stats = block.data as ParsedStat[];
       return (
-        <div key={index} className="grid gap-3 sm:grid-cols-2">
+        <div key={index} className="grid gap-2 sm:grid-cols-2 sm:gap-3">
           {stats.map((stat, i) => (
             <div
               key={i}
-              className="flex items-baseline gap-2 rounded-lg px-4 py-3"
+              className="flex flex-wrap items-baseline gap-1 rounded-lg px-3 py-2.5 sm:gap-2 sm:px-4 sm:py-3"
               style={{ background: "var(--card-tan)" }}
             >
-              <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+              <span className="text-xs font-semibold sm:text-sm" style={{ color: "var(--text-primary)" }}>
                 {stat.key}:
               </span>
               <span
-                className="text-sm"
+                className="text-xs sm:text-sm"
                 style={{ color: "var(--text-secondary)" }}
                 dangerouslySetInnerHTML={{ __html: renderInlineMarkdown(stat.value) }}
               />
@@ -176,7 +176,7 @@ export default function ReportView({
           <div className="absolute inset-0 z-0 bg-mesh" />
         )}
 
-        <div className={`relative z-10 p-8 sm:p-10 ${ogImage && !ogImgError ? "text-white" : ""}`}>
+        <div className={`relative z-10 p-5 sm:p-8 md:p-10 ${ogImage && !ogImgError ? "text-white" : ""}`}>
           <p
             className="mb-4 text-[11px] font-semibold uppercase tracking-[0.25em]"
             style={{
@@ -206,9 +206,30 @@ export default function ReportView({
         </div>
       </div>
 
+      {/* ── Mobile TOC: horizontal pill bar (outside flex layout) ── */}
+      <div className="report-toc sticky top-0 z-20 -mx-6 mt-6 mb-4 overflow-x-auto px-6 py-3 lg:hidden no-scrollbar" style={{ background: "var(--report-bg)" }}>
+        <div className="flex gap-2">
+          {sections.map((section, i) => (
+            <a
+              key={section.title}
+              href={`#section-${i}`}
+              className="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] transition-all whitespace-nowrap"
+              style={{
+                color: activeSection === i ? "white" : "var(--text-secondary)",
+                background: activeSection === i ? "var(--accent)" : "var(--card-tan)",
+                border: activeSection === i ? "1px solid var(--accent)" : "1px solid var(--border-report)",
+              }}
+            >
+              <span className="font-mono text-[10px]">{String(i + 1).padStart(2, "0")}</span>
+              {section.title}
+            </a>
+          ))}
+        </div>
+      </div>
+
       {/* ── BODY: TOC sidebar + content ── */}
-      <div className="mt-8 flex gap-8">
-        {/* Sticky TOC (desktop) */}
+      <div className="mt-4 flex gap-8 lg:mt-8">
+        {/* Sticky TOC (desktop only) */}
         <nav className="report-toc hidden w-[220px] shrink-0 lg:block">
           <div className="sticky top-8">
             <p
@@ -242,27 +263,6 @@ export default function ReportView({
           </div>
         </nav>
 
-        {/* Mobile TOC: horizontal pill bar */}
-        <div className="report-toc sticky top-0 z-20 -mx-6 mb-4 overflow-x-auto px-6 py-3 lg:hidden no-scrollbar" style={{ background: "var(--report-bg)" }}>
-          <div className="flex gap-2">
-            {sections.map((section, i) => (
-              <a
-                key={section.title}
-                href={`#section-${i}`}
-                className="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] transition-all whitespace-nowrap"
-                style={{
-                  color: activeSection === i ? "white" : "var(--text-secondary)",
-                  background: activeSection === i ? "var(--accent)" : "var(--card-tan)",
-                  border: activeSection === i ? "1px solid var(--accent)" : "1px solid var(--border-report)",
-                }}
-              >
-                <span className="font-mono text-[10px]">{String(i + 1).padStart(2, "0")}</span>
-                {section.title}
-              </a>
-            ))}
-          </div>
-        </div>
-
         {/* Main content */}
         <div className="min-w-0 flex-1">
           {sections.map((section, i) => {
@@ -274,7 +274,7 @@ export default function ReportView({
                 key={section.title}
                 id={`section-${i}`}
                 ref={(el) => { sectionRefs.current[i] = el; }}
-                className="report-section scroll-mt-24"
+                className="report-section scroll-mt-16 lg:scroll-mt-24"
               >
                 {i > 0 && <Divider />}
 
