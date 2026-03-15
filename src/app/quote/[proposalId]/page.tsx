@@ -16,7 +16,7 @@ import type {
 // ─── Constants ──────────────────────────────────────────────────────────────
 
 const STRIPE_DISCOVERY = "https://buy.stripe.com/7sY7sD9gH4AR02V1VA48001";
-const STRIPE_CALL = "https://buy.stripe.com/cNicMX2Sj2sJaHzdEi48000";
+const STRIPE_CALL = "https://buy.stripe.com/6oU00b3Wnd7n3f77fU48002";
 
 const ASSET_CLASSES: AssetClass[] = [
   "Real estate",
@@ -584,8 +584,9 @@ export default function QuotePage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-              {/* ── Column A: Discovery Workshop ───────────────────────────── */}
+            {/* Top row: Start Now + Join Pipeline */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              {/* ── Start Now (Discovery Workshop) ─────────────────────────── */}
               <div
                 className="relative flex flex-col rounded-2xl p-6"
                 style={{ background: "var(--bg-card)", border: "2px solid var(--color-teal)" }}
@@ -661,68 +662,7 @@ export default function QuotePage() {
                 </button>
               </div>
 
-              {/* ── Column B: Book a Call ───────────────────────────────────── */}
-              <div
-                className="flex flex-col rounded-2xl p-6"
-                style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
-              >
-                <h3 className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>
-                  Book a Call
-                </h3>
-                <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
-                  Not sure yet? Talk to Fernando first.
-                </p>
-
-                <div className="mt-6 flex-1">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-light" style={{ color: "var(--text-primary)" }}>$500</span>
-                  </div>
-                  <p className="mt-1 text-xs" style={{ color: "var(--text-secondary)" }}>
-                    30-minute diagnostic call
-                  </p>
-
-                  <div className="mt-5 flex flex-col gap-3">
-                    <div className="flex items-start gap-2">
-                      <svg className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-teal)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                        Personalised assessment of your tokenisation readiness
-                      </span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <svg className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-teal)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                        Credited against Discovery Workshop if you proceed within 30 days
-                      </span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <svg className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-teal)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                        Direct access to Fernando, our lead tokenisation advisor
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleCall}
-                  className="mt-5 w-full rounded-xl py-3.5 text-sm font-semibold transition-all hover:shadow-lg active:scale-[0.98]"
-                  style={{
-                    background: "var(--bg-card)",
-                    border: "2px solid var(--color-teal)",
-                    color: "var(--color-teal)",
-                  }}
-                >
-                  Book a Call &rarr;
-                </button>
-              </div>
-
-              {/* ── Column C: Join Pipeline ─────────────────────────────────── */}
+              {/* ── Join Pipeline ───────────────────────────────────────────── */}
               <div
                 className="flex flex-col rounded-2xl p-6"
                 style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
@@ -837,6 +777,57 @@ export default function QuotePage() {
                     </button>
                   </>
                 )}
+              </div>
+            </div>
+
+            {/* Bottom row: Not sure yet? */}
+            <div className="mt-6">
+              <div
+                className="flex flex-col gap-6 rounded-2xl p-6 sm:flex-row sm:items-center sm:justify-between"
+                style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
+              >
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>
+                    Not sure yet?
+                  </h3>
+                  <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
+                    Book a consultation call with Fernando for a 30-minute diagnostic. $500, credited against the Discovery Workshop if you proceed within 30 days.
+                  </p>
+                  <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:gap-4">
+                    <div className="flex items-center gap-2">
+                      <svg className="h-4 w-4 shrink-0 text-[var(--color-teal)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-xs" style={{ color: "var(--text-secondary)" }}>Personalised readiness assessment</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <svg className="h-4 w-4 shrink-0 text-[var(--color-teal)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-xs" style={{ color: "var(--text-secondary)" }}>Credited if you proceed</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <svg className="h-4 w-4 shrink-0 text-[var(--color-teal)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-xs" style={{ color: "var(--text-secondary)" }}>Direct access to Fernando</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex shrink-0 flex-col items-center gap-2">
+                  <span className="text-2xl font-light" style={{ color: "var(--text-primary)" }}>$500</span>
+                  <button
+                    onClick={handleCall}
+                    className="rounded-xl px-8 py-3 text-sm font-semibold transition-all hover:shadow-lg active:scale-[0.98]"
+                    style={{
+                      background: "var(--bg-card)",
+                      border: "2px solid var(--color-teal)",
+                      color: "var(--color-teal)",
+                    }}
+                  >
+                    Book a Consultation &rarr;
+                  </button>
+                </div>
               </div>
             </div>
           </div>
