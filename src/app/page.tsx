@@ -8,36 +8,21 @@ import AnalysisProgress from "@/components/AnalysisProgress";
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
-const LIVE_FEED = [
-  "Proposal #847 generated for $12M commercial real estate portfolio in 43s",
-  "Token economics modelled for Dubai-based fund in 38s",
-  "Regulatory framework mapped for DIFC asset manager in 51s",
-  "Proposal #1,204 delivered to logistics company in 47s",
-  "$85M infrastructure project analysed, 6-section proposal sent",
-  "Proposal #623 generated for agricultural commodity fund in 34s",
-  "Smart contract architecture designed for luxury auto dealer in 52s",
-  "Proposal #991 delivered, investor structure for family office mapped",
-  "$250M real estate fund tokenisation proposal in 41s",
-  "Proposal #1,456 generated for carbon credit marketplace in 39s",
-  "Equity tokenisation strategy created for Series B startup in 44s",
-  "Proposal #738 delivered, ADGM compliance roadmap included",
-];
-
 const HOW_IT_WORKS = [
   {
     step: "01",
-    title: "Paste your website",
-    desc: "We read your business in seconds, identifying assets, revenue model, and jurisdiction.",
+    title: "Paste your URL. Get your report.",
+    desc: "AI reads your business, identifies tokenisable assets, models the economics. 90 seconds.",
   },
   {
     step: "02",
-    title: "Get a custom proposal",
-    desc: "Receive a 6-section tokenisation strategy: asset analysis, token economics, regulatory roadmap, and more.",
+    title: "See your investor page before it exists.",
+    desc: "We generate a live mockup of what your crowdfunding / investor page would look like. You see the product before signing anything.",
   },
   {
     step: "03",
-    title: "Book an expert call",
-    desc: "Review the proposal with our blockchain advisors and begin implementation.",
+    title: "We build, launch, and connect you to investors.",
+    desc: "Token issuance, compliance, market-making, DeFi liquidity. End-to-end.",
   },
 ];
 
@@ -75,9 +60,43 @@ const FEATURES = [
 ];
 
 const METRICS = [
-  { value: "$1B+", label: "tokenisation pipeline" },
-  { value: "90s", label: "avg. proposal time" },
-  { value: "12+", label: "jurisdictions covered" },
+  { value: "$1B+", label: "Pipeline under MOU" },
+  { value: "3", label: "New clients per month" },
+  { value: "12+", label: "Jurisdictions covered" },
+  { value: "90s", label: "Avg. report time" },
+];
+
+// ─── Audience Data ───────────────────────────────────────────────────────────
+
+const AUDIENCE_TABS = [
+  {
+    id: "asset-manager" as const,
+    label: "Asset manager",
+    headline: "You manage real assets. Tokenisation gives them a capital markets layer.",
+    body: "Your portfolio \u2014 mortgages, auto loans, commodities, private credit \u2014 is illiquid by default. We structure a tokenised vehicle around it so institutional investors can come in, liquidity exists, and you\u2019re not waiting years for an exit.",
+    tiles: [
+      { name: "Swiss mortgages", outcome: "Turn a static loan book into a liquid, investor-grade instrument." },
+      { name: "Auto finance / ABS", outcome: "Your loan book is capital waiting to be unlocked." },
+      { name: "Commodities", outcome: "Physical commodities with a 24/7 tradeable price signal." },
+      { name: "Private credit", outcome: "Bring institutional capital into private credit \u2014 on your terms." },
+      { name: "Mining rights", outcome: "Finance extraction with investors, not just project debt." },
+      { name: "Other real assets", outcome: "If it produces cash flow or holds value, we can tokenise it." },
+    ],
+  },
+  {
+    id: "business-owner" as const,
+    label: "Business / asset owner",
+    headline: "You own the asset. We help you raise against it \u2014 without selling it.",
+    body: "Whether you\u2019re expanding a business, financing a mine, or monetising a commodity portfolio \u2014 we structure a token that lets investors buy in, you retain ownership, and the capital is yours to deploy.",
+    tiles: [
+      { name: "Mine / extraction", outcome: "Tokenise your royalty stream or production revenue." },
+      { name: "Real estate", outcome: "Fractional ownership without losing control." },
+      { name: "Operating business", outcome: "Raise growth capital from global investors." },
+      { name: "Physical commodities", outcome: "Physical assets with a digital capital markets layer." },
+      { name: "Auto / lease portfolio", outcome: "Turn receivables into investor-grade instruments." },
+      { name: "Other", outcome: "If it holds value or produces cash flow, we can structure it." },
+    ],
+  },
 ];
 
 // ─── Theme ───────────────────────────────────────────────────────────────────
@@ -134,26 +153,6 @@ function PartnerLogos({ dark }: { dark: boolean }) {
   );
 }
 
-// ─── Components ──────────────────────────────────────────────────────────────
-
-function LiveFeedTicker() {
-  const items = [...LIVE_FEED, ...LIVE_FEED];
-  return (
-    <div className="relative w-full overflow-hidden py-5 no-scrollbar">
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-32" style={{ background: `linear-gradient(to right, var(--bg), transparent)` }} />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-32" style={{ background: `linear-gradient(to left, var(--bg), transparent)` }} />
-      <div className="flex animate-ticker gap-8 whitespace-nowrap">
-        {items.map((item, i) => (
-          <span key={`${item}-${i}`} className="flex items-center gap-2 text-sm" style={{ color: "var(--text-muted)" }}>
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--color-teal)] opacity-60" />
-            {item}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 type FlowState = "landing" | "auth" | "analysing";
@@ -167,6 +166,10 @@ export default function Home() {
   const [userId, setUserId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Audience selector state
+  const [activeTab, setActiveTab] = useState<"asset-manager" | "business-owner">("asset-manager");
+  const [selectedTile, setSelectedTile] = useState<number | null>(null);
 
   // Check if already authenticated
   useEffect(() => {
@@ -246,6 +249,13 @@ export default function Home() {
     }
   };
 
+  const scrollToTopAndFocus = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setTimeout(() => inputRef.current?.focus(), 500);
+  };
+
+  const currentAudience = AUDIENCE_TABS.find((t) => t.id === activeTab)!;
+
   // ─── Analysing ─────────────────────────────────────────────────────────────
 
   if (flow === "analysing") {
@@ -287,8 +297,6 @@ export default function Home() {
       <nav className="sticky top-0 z-50 flex w-full items-center justify-between px-6 py-4 backdrop-blur-lg sm:px-12" style={{ borderBottom: "1px solid var(--border)", background: dark ? "rgba(5,5,7,0.85)" : "rgba(255,255,255,0.88)" }}>
         <PartnerLogos dark={dark} />
         <div className="flex items-center gap-5">
-          <a href="#how-it-works" className="hidden text-sm transition-colors hover:underline sm:block" style={{ color: "var(--text-secondary)" }}>How it works</a>
-          <a href="#features" className="hidden text-sm transition-colors hover:underline sm:block" style={{ color: "var(--text-secondary)" }}>Features</a>
           {userId ? (
             <>
               <button onClick={() => router.push("/dashboard")} className="hidden text-sm transition-colors hover:underline sm:block" style={{ color: "var(--text-secondary)" }}>
@@ -303,6 +311,22 @@ export default function Home() {
               Sign in
             </button>
           )}
+          <button
+            onClick={scrollToTopAndFocus}
+            className="hidden rounded-lg px-4 py-2 text-sm font-semibold text-white transition-all hover:shadow-lg active:scale-95 sm:block"
+            style={{ background: "var(--color-teal)" }}
+          >
+            Get your report &rarr;
+          </button>
+          <a
+            href="https://calend.ly/rfv"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden rounded-lg px-4 py-2 text-sm font-medium transition-all sm:block"
+            style={{ border: "1px solid var(--border)", color: "var(--text-secondary)", background: "var(--bg-card)" }}
+          >
+            Book a call
+          </a>
           <ThemeToggle dark={dark} toggle={toggle} />
         </div>
       </nav>
@@ -311,14 +335,19 @@ export default function Home() {
       <section className="flex min-h-[90vh] flex-col items-center justify-center px-6 pt-8">
         <div className="flex max-w-3xl flex-col items-center gap-7 text-center">
           <h1 className="animate-fade-in-up text-5xl font-bold leading-[1.1] tracking-tight opacity-0 sm:text-7xl" style={{ color: "var(--text-primary)" }}>
-            Tokenise{" "}
+            Real assets.
+            <br />
             <span className="bg-gradient-to-r from-[var(--color-teal)] via-[var(--color-teal-light)] to-[var(--color-teal)] bg-clip-text text-transparent">
-              anything.
+              Global capital.
             </span>
           </h1>
 
           <p className="animate-fade-in-up max-w-xl text-lg opacity-0 delay-100 sm:text-xl" style={{ color: "var(--text-secondary)" }}>
-            Paste your website. We read your business, identify tokenisable assets, model token economics, map the regulatory framework, and deliver a complete proposal in <strong style={{ color: "var(--text-primary)" }}>90 seconds</strong>.
+            We help asset managers and owners of real-world assets {"\u2014"} gold, mining, mortgages, auto finance {"\u2014"} raise institutional capital by moving their assets onchain. AI-powered reports. Proven infrastructure. Three clients per month.
+          </p>
+
+          <p className="animate-fade-in-up text-base opacity-0 delay-150" style={{ color: "var(--text-muted)" }}>
+            Understand how you could benefit.
           </p>
 
           {/* CTA Input */}
@@ -339,7 +368,7 @@ export default function Home() {
             <button type="submit"
               className="shrink-0 rounded-xl bg-[var(--color-teal)] px-6 py-3.5 text-base font-semibold text-white transition-all hover:shadow-lg active:scale-95 sm:px-8"
               style={{ boxShadow: "0 4px 20px var(--glow-color)" }}>
-              Generate Proposal →
+              Get your free report &rarr;
             </button>
           </form>
 
@@ -347,31 +376,80 @@ export default function Home() {
 
           <p className="animate-fade-in-up flex items-center gap-3 text-xs opacity-0 delay-300" style={{ color: "var(--text-muted)" }}>
             <span>Free</span>
-            <span style={{ color: "var(--text-faint)" }}>·</span>
-            <span>No credit card required</span>
-            <span style={{ color: "var(--text-faint)" }}>·</span>
-            <span>Proposal in 90 seconds</span>
+            <span style={{ color: "var(--text-faint)" }}>&middot;</span>
+            <span>No crypto knowledge required</span>
+            <span style={{ color: "var(--text-faint)" }}>&middot;</span>
+            <span>Report in 90 seconds</span>
           </p>
 
           <a href="https://calend.ly/rfv" target="_blank" rel="noopener noreferrer" className="animate-fade-in-up text-xs opacity-0 delay-400 transition-colors hover:underline" style={{ color: "var(--text-muted)" }}>
-            or schedule a consultation →
+            or schedule a consultation &rarr;
           </a>
         </div>
       </section>
 
-      {/* Live Activity Ticker */}
-      <section style={{ borderTop: "1px solid var(--section-border)", borderBottom: "1px solid var(--section-border)" }}>
-        <div className="flex items-center gap-3 py-1">
-          <div className="shrink-0 pl-6 sm:pl-12">
-            <span className="flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider" style={{ background: "var(--badge-bg)", color: "var(--accent)" }}>
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--color-teal)] opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--color-teal)]" />
-              </span>
-              Live
-            </span>
+      {/* Audience Selector */}
+      <section style={{ borderTop: "1px solid var(--section-border)" }} className="py-28">
+        <div className="mx-auto max-w-5xl px-6 sm:px-12">
+          <div className="mb-12 text-center">
+            <p className="mb-3 text-sm font-medium uppercase tracking-widest" style={{ color: "var(--accent)" }}>What best describes you?</p>
           </div>
-          <LiveFeedTicker />
+
+          {/* Tabs */}
+          <div className="mb-10 flex justify-center gap-2">
+            {AUDIENCE_TABS.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => { setActiveTab(tab.id); setSelectedTile(null); }}
+                className="rounded-xl px-6 py-3 text-sm font-semibold transition-all"
+                style={{
+                  background: activeTab === tab.id ? "var(--color-teal)" : "var(--bg-card)",
+                  color: activeTab === tab.id ? "#ffffff" : "var(--text-secondary)",
+                  border: activeTab === tab.id ? "1px solid var(--color-teal)" : "1px solid var(--border)",
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab Content */}
+          <div className="mb-10 text-center">
+            <h3 className="mb-4 text-2xl font-bold sm:text-3xl" style={{ color: "var(--text-primary)" }}>
+              {currentAudience.headline}
+            </h3>
+            <p className="mx-auto max-w-2xl text-base leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+              {currentAudience.body}
+            </p>
+          </div>
+
+          {/* Industry Tiles */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {currentAudience.tiles.map((tile, i) => (
+              <button
+                key={tile.name}
+                onClick={() => setSelectedTile(selectedTile === i ? null : i)}
+                className="group rounded-xl p-6 text-left transition-all hover:translate-y-[-2px]"
+                style={{
+                  background: selectedTile === i ? "var(--bg-card)" : "var(--feature-bg)",
+                  border: selectedTile === i ? "1px solid var(--color-teal)" : "1px solid var(--border)",
+                }}
+              >
+                <h4 className="mb-2 text-base font-semibold" style={{ color: "var(--text-primary)" }}>{tile.name}</h4>
+                {selectedTile === i && (
+                  <div
+                    className="animate-fade-in mt-3 border-l-2 pl-4 text-sm leading-relaxed"
+                    style={{ borderColor: "var(--color-teal)", color: "var(--text-secondary)" }}
+                  >
+                    {tile.outcome}
+                  </div>
+                )}
+                {selectedTile !== i && (
+                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>Click to learn more</p>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -379,7 +457,7 @@ export default function Home() {
       <section id="how-it-works" className="mx-auto max-w-5xl px-6 py-28 sm:px-12">
         <div className="mb-16 text-center">
           <p className="mb-3 text-sm font-medium uppercase tracking-widest" style={{ color: "var(--accent)" }}>How it works</p>
-          <h2 className="text-3xl font-bold sm:text-4xl" style={{ color: "var(--text-primary)" }}>From URL to proposal in 90 seconds</h2>
+          <h2 className="text-3xl font-bold sm:text-4xl" style={{ color: "var(--text-primary)" }}>From URL to report in 90 seconds</h2>
         </div>
 
         <div className="grid gap-8 sm:grid-cols-3">
@@ -394,14 +472,47 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Live Proof */}
+      <section style={{ borderTop: "1px solid var(--section-border)" }} className="py-28">
+        <div className="mx-auto max-w-5xl px-6 sm:px-12">
+          <div className="mb-12 text-center">
+            <span className="mb-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider" style={{ background: "var(--badge-bg)", color: "var(--accent)" }}>
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--color-teal)] opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--color-teal)]" />
+              </span>
+              Live proof
+            </span>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="rounded-2xl p-8" style={{ background: "var(--step-card-bg)", border: "1px solid var(--border)" }}>
+              <p className="mb-1 text-sm font-semibold uppercase tracking-wider" style={{ color: "var(--accent)" }}>XAUH</p>
+              <h3 className="mb-3 text-xl font-bold" style={{ color: "var(--text-primary)" }}>Swiss gold token (first live client)</h3>
+              <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                Physical LBMA gold, Swiss vault, on TON + EVM. Listed on CapitalDEX and Biconomy.
+              </p>
+            </div>
+
+            <div className="rounded-2xl p-8" style={{ background: "var(--step-card-bg)", border: "1px solid var(--border)" }}>
+              <p className="mb-1 font-mono text-3xl font-bold" style={{ color: "var(--accent)" }}>$1B+</p>
+              <h3 className="mb-3 text-xl font-bold" style={{ color: "var(--text-primary)" }}>Pipeline under MOU</h3>
+              <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                Swiss mortgages, industrial commodities, auto leases. Institutional grade.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
       <section id="features" style={{ borderTop: "1px solid var(--section-border)" }} className="py-28">
         <div className="mx-auto max-w-5xl px-6 sm:px-12">
           <div className="mb-16 text-center">
-            <p className="mb-3 text-sm font-medium uppercase tracking-widest" style={{ color: "var(--color-purple)" }}>Your proposal includes</p>
+            <p className="mb-3 text-sm font-medium uppercase tracking-widest" style={{ color: "var(--color-purple)" }}>Your report includes</p>
             <h2 className="text-3xl font-bold sm:text-4xl" style={{ color: "var(--text-primary)" }}>Comprehensive, expert-reviewed</h2>
             <p className="mx-auto mt-4 max-w-lg text-sm" style={{ color: "var(--text-secondary)" }}>
-              Each proposal contains 6 comprehensive sections covering every aspect of your tokenisation strategy.
+              Each report contains 6 comprehensive sections covering every aspect of your tokenisation strategy.
             </p>
           </div>
 
@@ -460,10 +571,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Final CTA with Metrics */}
+      {/* Stats Bar + Final CTA */}
       <section style={{ borderTop: "1px solid var(--section-border)" }} className="py-28">
         <div className="mx-auto flex max-w-3xl flex-col items-center gap-12 px-6 text-center">
-          <div className="flex w-full max-w-md justify-between">
+          <div className="flex w-full max-w-lg justify-between">
             {METRICS.map((m) => (
               <div key={m.label} className="flex flex-col items-center gap-1">
                 <span className="font-mono text-3xl font-bold sm:text-4xl" style={{ color: "var(--accent)" }}>{m.value}</span>
@@ -474,19 +585,19 @@ export default function Home() {
 
           <div>
             <h2 className="text-3xl font-bold sm:text-4xl" style={{ color: "var(--text-primary)" }}>
-              Ready to tokenise your assets?
+              Ready to see what your assets are worth?
             </h2>
             <p className="mt-3" style={{ color: "var(--text-secondary)" }}>
-              Get your free proposal now, or speak with our advisory team.
+              Get your free report now, or speak with our advisory team.
             </p>
           </div>
 
           <div className="flex flex-col gap-4 sm:flex-row">
             <button
-              onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); setTimeout(() => inputRef.current?.focus(), 500); }}
+              onClick={scrollToTopAndFocus}
               className="rounded-xl bg-[var(--color-teal)] px-8 py-4 text-base font-semibold text-white transition-all hover:shadow-lg active:scale-95"
               style={{ boxShadow: "0 4px 20px var(--glow-color)" }}>
-              Generate Proposal →
+              Get your free report &rarr;
             </button>
             <a href="https://calend.ly/rfv" target="_blank" rel="noopener noreferrer" className="rounded-xl px-8 py-4 text-base font-medium transition-all"
               style={{ border: "1px solid var(--border)", color: "var(--text-secondary)", background: "var(--bg-card)" }}>
@@ -495,7 +606,7 @@ export default function Home() {
           </div>
 
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            Free · No credit card · Proposal in 90 seconds
+            Free &middot; No crypto knowledge required &middot; Report in 90 seconds
           </p>
         </div>
       </section>
@@ -505,7 +616,7 @@ export default function Home() {
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-6 sm:flex-row">
           <PartnerLogos dark={dark} />
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            Deca4 Advisory FZE · Dubai World Trade Center · info@deca4.com
+            Deca4 Advisory FZE &middot; Dubai World Trade Center &middot; info@deca4.com
           </p>
         </div>
       </footer>
