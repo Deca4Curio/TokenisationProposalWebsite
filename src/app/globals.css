@@ -9,6 +9,7 @@
   --color-tan: #E8E4DE;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-montserrat);
 }
 
 /* Light mode defaults */
@@ -50,6 +51,10 @@
   --spinner-inner-track: #f3f4f6;
   --check-text: #ffffff;
   --input-focus-border: rgba(0,169,165,0.4);
+  --report-bg: #ffffff;
+  --card-tan: #EDEAE5;
+  --border-report: #E2DDD6;
+  --text-gray: #888888;
   color-scheme: light;
 }
 
@@ -92,6 +97,10 @@
   --spinner-inner-track: #2a2a38;
   --check-text: #ffffff;
   --input-focus-border: rgba(0,169,165,0.4);
+  --report-bg: #0a0a0f;
+  --card-tan: #1a1a22;
+  --border-report: #2a2a35;
+  --text-gray: #6b7280;
   color-scheme: dark;
 }
 
@@ -180,4 +189,21 @@ body {
 /* Logo dark mode inversion for Curio (dark text needs to become light) */
 .dark .logo-curio path[fill="#111111"] {
   fill: #f0f0f5;
+}
+
+/* Print styles for report */
+@media print {
+  .report-toc,
+  .report-nav,
+  .report-cta {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: #111 !important;
+  }
+  .report-section {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
 }

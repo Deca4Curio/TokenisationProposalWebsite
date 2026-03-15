@@ -1,47 +1,165 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import CompanyBadge from "@/components/CompanyBadge";
-import type { ReportSection, SiteMetadata } from "@/types";
+import ReportIcon, { getIconForSection } from "@/components/report/ReportIcons";
+import SectionLabel from "@/components/report/SectionLabel";
+import SectionHeading from "@/components/report/SectionHeading";
+import StatRow from "@/components/report/StatRow";
+import CardGrid from "@/components/report/CardGrid";
+import CalloutBox from "@/components/report/CalloutBox";
+import ReportTable from "@/components/report/ReportTable";
+import Timeline from "@/components/report/Timeline";
+import QuoteBlock from "@/components/report/QuoteBlock";
+import Divider from "@/components/report/Divider";
+import {
+  parseContent,
+  renderInlineMarkdown,
+  type ContentBlock,
+  type StatItem as ParsedStat,
+  type CardItem,
+  type TableData,
+  type TimelinePhase,
+  type CalloutData,
+} from "@/lib/report-parser";
+import { extractMetrics } from "@/lib/report-metrics";
+import type { ReportSection, SiteMetadata, Questionnaire } from "@/types";
 
 interface ReportViewProps {
   sections: ReportSection[];
   companyName: string;
   url: string;
   siteMetadata?: SiteMetadata;
+  questionnaire?: Questionnaire;
 }
 
-function renderMarkdown(md: string): string {
+function renderBlock(block: ContentBlock, index: number) {
+  switch (block.type) {
+    case "subheading":
+      return (
+        <h3
+          key={index}
+          className="mt-6 mb-3 text-lg font-medium"
+          style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}
+        >
+          {block.data as string}
+        </h3>
+      );
+
+    case "stats": {
+      const stats = block.data as ParsedStat[];
+      return (
+        <div key={index} className="grid gap-3 sm:grid-cols-2">
+          {stats.map((stat, i) => (
+            <div
+              key={i}
+              className="flex items-baseline gap-2 rounded-lg px-4 py-3"
+              style={{ background: "var(--card-tan)" }}
+            >
+              <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                {stat.key}:
+              </span>
+              <span
+                className="text-sm"
+                style={{ color: "var(--text-secondary)" }}
+                dangerouslySetInnerHTML={{ __html: renderInlineMarkdown(stat.value) }}
+              />
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    case "cards":
+      return <CardGrid key={index} items={block.data as CardItem[]} />;
+
+    case "table": {
+      const table = block.data as TableData;
+      return <ReportTable key={index} headers={table.headers} rows={table.rows} />;
+    }
+
+    case "timeline":
+      return <Timeline key={index} phases={block.data as TimelinePhase[]} />;
+
+    case "callout": {
+      const callout = block.data as CalloutData;
+      return (
+        <CalloutBox key={index} title={callout.label}>
+          {callout.text}
+        </CalloutBox>
+      );
+    }
+
+    case "quote":
+      return <QuoteBlock key={index}>{block.data as string}</QuoteBlock>;
+
+    case "prose":
+    default: {
+      const html = renderProseMarkdown(block.data as string);
+      return (
+        <div
+          key={index}
+          className="prose-report text-sm leading-relaxed"
+          style={{ color: "var(--text-secondary)" }}
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+      );
+    }
+  }
+}
+
+function renderProseMarkdown(md: string): string {
   return md
-    .replace(/^### (.+)$/gm, '<h4 class="text-base font-semibold mt-4 mb-2" style="color: var(--text-primary)">$1</h4>')
-    .replace(/^## (.+)$/gm, '<h3 class="text-lg font-semibold mt-5 mb-2" style="color: var(--text-primary)">$1</h3>')
+    .replace(/^### (.+)$/gm, '<h4 class="text-base font-semibold mt-4 mb-2" style="color: var(--text-primary); font-family: var(--font-heading)">$1</h4>')
+    .replace(/^## (.+)$/gm, '<h3 class="text-lg font-medium mt-5 mb-2" style="color: var(--text-primary); font-family: var(--font-heading)">$1</h3>')
     .replace(/\*\*(.+?)\*\*/g, '<strong style="color: var(--text-primary)">$1</strong>')
     .replace(/\*(.+?)\*/g, "<em>$1</em>")
-    .replace(/^- (.+)$/gm, '<li class="ml-4 mb-1">$1</li>')
-    .replace(/((?:<li[^>]*>.*<\/li>\n?)+)/g, '<ul class="list-disc mb-3">$1</ul>')
-    .replace(/^(?!<[hul])([\w$"'].+)$/gm, '<p class="mb-3">$1</p>');
+    .replace(
+      /\[([^\]]+)\]\(([^)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer" class="underline" style="color: var(--accent)">$1</a>'
+    )
+    .replace(/^- (.+)$/gm, '<li class="ml-4 mb-1.5 pl-1">$1</li>')
+    .replace(/((?:<li[^>]*>.*<\/li>\n?)+)/g, '<ul class="list-disc mb-4 space-y-0.5">$1</ul>')
+    .replace(/^(?!<[hula])([\w$"'(].+)$/gm, '<p class="mb-3">$1</p>');
 }
 
-const SECTION_ICONS: Record<string, string> = {
-  "Asset Analysis": "M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7",
-  "Token Economics": "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
-  "Regulatory Framework": "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
-  "Smart Contract Architecture": "M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4",
-  "Go-to-Market Strategy": "M13 7h8m0 0v8m0-8l-8 8-4-4-6 6",
-  "Financial Projections": "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z",
-  "Executive Summary": "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
-};
-
-export default function ReportView({ sections, companyName, url, siteMetadata }: ReportViewProps) {
+export default function ReportView({
+  sections,
+  companyName,
+  url,
+  siteMetadata,
+  questionnaire,
+}: ReportViewProps) {
   const [ogImgError, setOgImgError] = useState(false);
+  const [activeSection, setActiveSection] = useState(0);
+  const sectionRefs = useRef<(HTMLElement | null)[]>([]);
   const ogImage = siteMetadata?.ogImage;
+  const metrics = extractMetrics(questionnaire);
+
+  // IntersectionObserver for sticky TOC highlight
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+
+    sectionRefs.current.forEach((el, i) => {
+      if (!el) return;
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) setActiveSection(i);
+        },
+        { rootMargin: "-20% 0px -60% 0px" }
+      );
+      observer.observe(el);
+      observers.push(observer);
+    });
+
+    return () => observers.forEach((o) => o.disconnect());
+  }, [sections.length]);
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Report hero header */}
+    <div className="flex flex-col gap-0">
+      {/* ── HERO ── */}
       <div className="relative overflow-hidden rounded-2xl" style={{ border: "1px solid var(--border)" }}>
-        {/* OG image background if available */}
-        {ogImage && !ogImgError && (
+        {ogImage && !ogImgError ? (
           <div className="absolute inset-0 z-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -52,95 +170,132 @@ export default function ReportView({ sections, companyName, url, siteMetadata }:
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/30" />
           </div>
+        ) : (
+          <div className="absolute inset-0 z-0 bg-mesh" />
         )}
 
-        {/* Content overlay */}
-        <div className={`relative z-10 p-6 sm:p-8 ${ogImage && !ogImgError ? "text-white" : ""}`}>
+        <div className={`relative z-10 p-8 sm:p-10 ${ogImage && !ogImgError ? "text-white" : ""}`}>
           <p
-            className="mb-3 text-xs font-semibold uppercase tracking-widest"
-            style={{ color: ogImage && !ogImgError ? "rgba(255,255,255,0.7)" : "var(--accent)" }}
+            className="mb-4 text-[11px] font-semibold uppercase tracking-[0.25em]"
+            style={{
+              color: ogImage && !ogImgError ? "rgba(255,255,255,0.6)" : "var(--accent)",
+              fontFamily: "var(--font-heading)",
+            }}
           >
             Tokenisation Proposal
           </p>
 
-          <CompanyBadge
-            url={url}
-            companyName={companyName}
-            favicon={siteMetadata?.favicon}
-            size="lg"
-          />
+          <CompanyBadge url={url} companyName={companyName} favicon={siteMetadata?.favicon} size="lg" />
 
           {siteMetadata?.description && (
             <p
-              className="mt-4 max-w-xl text-sm leading-relaxed"
-              style={{ color: ogImage && !ogImgError ? "rgba(255,255,255,0.8)" : "var(--text-secondary)" }}
+              className="mt-4 max-w-2xl text-sm leading-relaxed"
+              style={{ color: ogImage && !ogImgError ? "rgba(255,255,255,0.75)" : "var(--text-secondary)" }}
             >
               {siteMetadata.description}
             </p>
           )}
-        </div>
-      </div>
 
-      {/* Table of contents */}
-      <div className="rounded-2xl p-5" style={{ background: "var(--bg-input)", border: "1px solid var(--border)" }}>
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-          Contents
-        </p>
-        <div className="grid gap-1.5 sm:grid-cols-2">
-          {sections.map((section, i) => (
-            <a
-              key={section.title}
-              href={`#section-${i}`}
-              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-all hover:bg-[var(--badge-bg)]"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              <span className="font-mono text-xs" style={{ color: "var(--accent)" }}>{String(i + 1).padStart(2, "0")}</span>
-              {section.title}
-            </a>
-          ))}
-        </div>
-      </div>
-
-      {/* Report sections */}
-      {sections.map((section, i) => (
-        <div
-          key={section.title}
-          id={`section-${i}`}
-          className="animate-fade-in-up scroll-mt-8 rounded-2xl p-6 sm:p-8"
-          style={{
-            background: "var(--bg-card)",
-            border: "1px solid var(--border)",
-            animationDelay: `${i * 100}ms`,
-            opacity: 0,
-          }}
-        >
-          <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "var(--badge-bg)" }}>
-              <svg
-                className="h-5 w-5" style={{ color: "var(--accent)" }}
-                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"
-              >
-                <path d={SECTION_ICONS[section.title] || SECTION_ICONS["Asset Analysis"]} />
-              </svg>
+          {metrics.length > 0 && (
+            <div className="mt-6">
+              <StatRow stats={metrics} />
             </div>
-            <div>
-              <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
-                Section {i + 1} of {sections.length}
-              </span>
-              <h2 className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>
-                {section.title}
-              </h2>
+          )}
+        </div>
+      </div>
+
+      {/* ── BODY: TOC sidebar + content ── */}
+      <div className="mt-8 flex gap-8">
+        {/* Sticky TOC (desktop) */}
+        <nav className="report-toc hidden w-[220px] shrink-0 lg:block">
+          <div className="sticky top-8">
+            <p
+              className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em]"
+              style={{ color: "var(--text-gray)" }}
+            >
+              Contents
+            </p>
+            <div className="flex flex-col gap-0.5">
+              {sections.map((section, i) => (
+                <a
+                  key={section.title}
+                  href={`#section-${i}`}
+                  className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] transition-all"
+                  style={{
+                    color: activeSection === i ? "var(--accent)" : "var(--text-secondary)",
+                    background: activeSection === i ? "rgba(0,169,165,0.06)" : "transparent",
+                    fontWeight: activeSection === i ? 500 : 400,
+                  }}
+                >
+                  <span
+                    className="font-mono text-[11px]"
+                    style={{ color: activeSection === i ? "var(--accent)" : "var(--text-gray)", opacity: activeSection === i ? 1 : 0.6 }}
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="truncate">{section.title}</span>
+                </a>
+              ))}
             </div>
           </div>
+        </nav>
 
-          <div
-            className="prose-sm leading-relaxed"
-            style={{ color: "var(--text-secondary)" }}
-            dangerouslySetInnerHTML={{ __html: renderMarkdown(section.content) }}
-          />
+        {/* Mobile TOC: horizontal pill bar */}
+        <div className="report-toc sticky top-0 z-20 -mx-6 mb-4 overflow-x-auto px-6 py-3 lg:hidden no-scrollbar" style={{ background: "var(--report-bg)" }}>
+          <div className="flex gap-2">
+            {sections.map((section, i) => (
+              <a
+                key={section.title}
+                href={`#section-${i}`}
+                className="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] transition-all whitespace-nowrap"
+                style={{
+                  color: activeSection === i ? "white" : "var(--text-secondary)",
+                  background: activeSection === i ? "var(--accent)" : "var(--card-tan)",
+                  border: activeSection === i ? "1px solid var(--accent)" : "1px solid var(--border-report)",
+                }}
+              >
+                <span className="font-mono text-[10px]">{String(i + 1).padStart(2, "0")}</span>
+                {section.title}
+              </a>
+            ))}
+          </div>
         </div>
-      ))}
+
+        {/* Main content */}
+        <div className="min-w-0 flex-1">
+          {sections.map((section, i) => {
+            const blocks = parseContent(section.content);
+            const iconName = getIconForSection(section.title);
+
+            return (
+              <section
+                key={section.title}
+                id={`section-${i}`}
+                ref={(el) => { sectionRefs.current[i] = el; }}
+                className="report-section scroll-mt-24"
+              >
+                {i > 0 && <Divider />}
+
+                <div className="mb-2 flex items-center gap-3">
+                  <div
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+                    style={{ background: "rgba(0,169,165,0.08)" }}
+                  >
+                    <ReportIcon name={iconName} size={18} className="text-[var(--accent)]" />
+                  </div>
+                  <SectionLabel number={i + 1} label={section.title} />
+                </div>
+
+                <SectionHeading>{section.title}</SectionHeading>
+
+                <div className="flex flex-col gap-5">
+                  {blocks.map((block, bi) => renderBlock(block, bi))}
+                </div>
+              </section>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

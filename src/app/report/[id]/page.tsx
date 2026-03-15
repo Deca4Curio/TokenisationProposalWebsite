@@ -114,9 +114,9 @@ export default function ReportPage() {
   // Report ready
   return (
     <div className="min-h-screen px-6 py-12" style={{ background: "var(--bg)" }}>
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-6xl">
         {/* Nav */}
-        <div className="mb-8 flex items-center justify-between">
+        <div className="report-nav mb-8 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Image src="/logos/deca4.svg" alt="Deca4" width={136} height={50} className="h-6 w-auto" priority />
             <span style={{ color: "var(--text-faint)" }} className="font-light">x</span>
@@ -132,7 +132,7 @@ export default function ReportPage() {
             className="text-sm transition-colors hover:underline"
             style={{ color: "var(--text-secondary)" }}
           >
-            Dashboard →
+            Dashboard
           </button>
         </div>
 
@@ -142,15 +142,19 @@ export default function ReportPage() {
             companyName={proposal.questionnaireSubmitted?.companyName || proposal.questionnaire?.companyName || ""}
             url={proposal.url}
             siteMetadata={proposal.siteMetadata}
+            questionnaire={proposal.questionnaireSubmitted || proposal.questionnaire}
           />
         )}
 
         {/* CTA */}
         <div
-          className="mt-8 rounded-2xl p-8 text-center"
-          style={{ background: "var(--feature-bg)", border: "1px solid var(--border)" }}
+          className="report-cta mt-12 rounded-2xl p-8 text-center"
+          style={{ background: "var(--card-tan)", border: "1px solid var(--border-report)" }}
         >
-          <h3 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
+          <h3
+            className="text-2xl font-light"
+            style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}
+          >
             Ready to move forward?
           </h3>
           <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
@@ -164,14 +168,14 @@ export default function ReportPage() {
               className="rounded-xl bg-[var(--color-teal)] px-8 py-4 text-base font-semibold text-white transition-all hover:shadow-lg active:scale-95"
               style={{ boxShadow: "0 4px 20px var(--glow-color)" }}
             >
-              Book a Call →
+              Book a Call
             </a>
             <button
-              onClick={() => router.push("/dashboard")}
+              onClick={() => window.print()}
               className="rounded-xl px-8 py-4 text-base font-medium transition-all"
               style={{ border: "1px solid var(--border)", color: "var(--text-secondary)", background: "var(--bg-card)" }}
             >
-              View Dashboard
+              Download PDF
             </button>
           </div>
         </div>
