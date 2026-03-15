@@ -23,6 +23,8 @@ export interface Questionnaire {
   targetInvestors: string;
   tokenStandard: string;
   regulatoryNotes: string;
+  businessObjectives?: string[];
+  biggestChallenge?: string;
 }
 
 // New multi-step wizard data
@@ -45,20 +47,26 @@ export type TokenisationGoal =
   | "debt"
   | "inventory_product_fund";
 
+export type BusinessObjective =
+  | "raise_capital"
+  | "unlock_liquidity"
+  | "new_revenue"
+  | "expand_access";
+
 export interface TokenisationDetails {
-  goals: TokenisationGoal[];
+  objectives: BusinessObjective[];
   estimatedValue: string;
   jurisdiction: string;
   targetInvestors: string;
   timeline: string;
   existingStructure: string;
-  offeringType: string;
+  biggestChallenge: string;
 }
 
 export interface WizardData {
   contact: ContactInfo;
   company: CompanyInfo;
-  goals: TokenisationGoal[];
+  objectives: BusinessObjective[];
   details: TokenisationDetails;
 }
 

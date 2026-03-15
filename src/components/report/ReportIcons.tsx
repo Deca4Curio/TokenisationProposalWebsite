@@ -41,13 +41,21 @@ const ICON_PATHS: Record<string, string> = {
 
 // Map section titles to icon names
 const SECTION_ICON_MAP: Record<string, string> = {
+  // New 7-section structure
+  "Executive Summary": "document",
+  "Tokenisation Opportunities": "lightbulb",
+  "Market Validation": "trending-up",
+  "Implementation Plan": "gear",
+  "Financial Outlook": "chart",
+  "Opportunity Cost": "calendar",
+  "Your Partners": "users",
+  // Legacy (keep for old reports)
   "Asset Analysis": "building",
   "Token Economics": "dollar",
   "Regulatory Framework": "shield",
   "Smart Contract Architecture": "code",
   "Go-to-Market Strategy": "trending-up",
   "Financial Projections": "chart",
-  "Executive Summary": "document",
 };
 
 interface ReportIconProps {

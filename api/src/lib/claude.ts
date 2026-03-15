@@ -22,7 +22,7 @@ function cleanJsonString(text: string): string {
 
 const REPORT_TOOL: Anthropic.Messages.Tool = {
   name: "submit_report",
-  description: "Submit the completed tokenisation report with all 6 sections",
+  description: "Submit the completed tokenisation report with all 7 sections",
   input_schema: {
     type: "object" as const,
     properties: {
@@ -36,8 +36,8 @@ const REPORT_TOOL: Anthropic.Messages.Tool = {
           },
           required: ["title", "content"],
         },
-        minItems: 6,
-        maxItems: 6,
+        minItems: 7,
+        maxItems: 7,
       },
     },
     required: ["sections"],
@@ -53,6 +53,36 @@ function extractSectionsFromToolUse(response: Anthropic.Messages.Message): Repor
   return input.sections;
 }
 
+const CASE_STUDY_BANK = `
+CASE STUDY REFERENCE BANK (use relevant examples based on asset class):
+- Gold/Commodities: CurioInvest XAUH token, backed by physical gold in Swiss vaults, traded on secondary markets
+- Real Estate: RealT (tokenised US rental properties, $100M+ tokenised), Propy (on-chain property transfers)
+- Equity/Securities: Securitize (SEC-registered, $1B+ tokenised), tZERO (regulated ATS for security tokens)
+- Bonds/Debt: European Investment Bank (€100M digital bond on Ethereum), Obligate (on-chain corporate bonds)
+- Funds: BlackRock BUIDL (tokenised Treasury fund, $500M+ AUM), Franklin Templeton (on-chain money market fund)
+- Art/Collectibles: Masterworks (fractional blue-chip art), Maecenas (blockchain art investment)
+`;
+
+const PARTNER_CREDENTIALS = `
+PARTNER CREDENTIALS (use in "Your Partners" section):
+
+CurioInvest:
+- Launched XAUH: first gold-backed token with Swiss vault custody
+- Featured in Forbes, Bloomberg, CoinDesk
+- Issued first tokenised corporate bond in Switzerland
+- CHF 1B mortgage-backed securities tokenisation pipeline
+- Operating since 2018, regulated in Liechtenstein
+- Legal counsel: LEXR (leading Swiss blockchain law firm)
+
+Deca4 Advisory:
+- Headquarters: Dubai World Trade Centre, UAE
+- RAK Digital Assets Oasis: land registry tokenisation (pilot)
+- TDRA (Telecommunications & Digital Government Regulatory Authority): blockchain assessment
+- DIFC Courts: digital evidence & smart contract dispute resolution
+- $1B+ combined tokenisation pipeline across 6 jurisdictions
+- Team: blockchain architects, compliance specialists, financial structuring experts
+`;
+
 const FORMATTING_RULES = `
 FORMATTING RULES:
 - Use **Bold Label:** Value pairs on consecutive lines for key metrics (3+ in a row)
@@ -65,37 +95,55 @@ FORMATTING RULES:
 - Mix prose paragraphs between structured elements for readability
 
 SECTION-SPECIFIC GUIDANCE:
-1. Asset Analysis: Start with a prose overview, then use **bold:** value pairs for key asset characteristics (e.g. **Asset Class:** Real Estate, **Estimated Value:** $50M, **Jurisdiction:** UAE, **Ownership Structure:** Freehold). End with a key insight callout.
+1. Executive Summary: Start with a compelling prose paragraph about the opportunity. Use **bold:** value pairs for 3-5 headline numbers (estimated value, potential raise, projected ROI, timeline). End with a > blockquote giving a clear recommendation.
 
-2. Token Economics: Use a | table | for token distribution/allocation. Use **bold:** value pairs for token specs (supply, price, minimum investment). Prose for yield mechanism explanation.
+2. Tokenisation Opportunities: Use - **Opportunity:** Description cards for each opportunity mapped to their business objectives. Use **bold:** value pairs for goal-to-opportunity mapping. Prose explaining how tokenisation addresses each stated objective.
 
-3. Regulatory Framework: Use - **Requirement:** Description cards for compliance items. A | table | comparing regulatory options if relevant. Prose for jurisdiction analysis.
+3. Market Validation: Use a | table | for case study comparisons (project, asset class, amount tokenised, outcome). Use **bold:** value pairs for market data points. Use > for a testimonial or key market quote.
 
-4. Smart Contract Architecture: Use - **Component:** Description cards for contract modules. A **Phase N:** timeline for deployment stages.
+4. Implementation Plan: Use **Phase N:** timeline for implementation phases (legal structuring, token design, compliance, distribution, launch). Use - **Component:** Description cards for key workstreams.
 
-5. Go-to-Market Strategy: Use **Phase N:** timeline for launch phases. Use - **Channel:** Description cards for marketing channels.
+5. Financial Outlook: Use a | table | for year-by-year projections. Use **bold:** value pairs for key metrics (capital raised, liquidity unlocked, revenue, ROI). Include a comparison | table | of traditional vs tokenised approach costs.
 
-6. Financial Projections: Use a | table | for year-by-year projections. Use **bold:** value pairs for key financial metrics (ROI, yield, break-even). End with a key insight callout.`;
+6. Opportunity Cost: Use **bold:** value pairs for cost-of-waiting drivers (locked liquidity per month, missed investor pool size, competitor moves). Include a comparison | table | showing "Act Now" vs "Wait 12 Months" scenarios. End with a **Key Insight:** callout on urgency.
+
+7. Your Partners: Use - **Credential:** Description cards for CurioInvest and Deca4 credentials. Use > for a testimonial quote. Use **bold:** value pairs for track record stats.`;
 
 function buildReportPrompt(url: string, questionnaire: Questionnaire): string {
-  return `You are a senior tokenisation advisor at Deca4 Advisory, a blockchain consulting firm based in Dubai. Generate a comprehensive tokenisation report.
+  const objectives = questionnaire.businessObjectives?.length
+    ? questionnaire.businessObjectives.join(", ")
+    : questionnaire.assetTypes.join(", ");
+  const objectivesLabel = questionnaire.businessObjectives?.length
+    ? "Business Objectives"
+    : "Asset Types (legacy)";
+
+  const challengeBlock = questionnaire.biggestChallenge
+    ? `Biggest Challenge: ${questionnaire.biggestChallenge}`
+    : "";
+
+  return `You are a senior tokenisation advisor writing a report for a business executive who may not understand blockchain. Your job is to show them the business opportunity, prove it works, explain how it would work for them, quantify the returns, show the cost of inaction, and position CurioInvest + Deca4 as the right partners.
 
 Company: ${questionnaire.companyName}
 Website: ${url}
 Industry: ${questionnaire.industry}
 Jurisdiction: ${questionnaire.jurisdiction}
-Asset Types: ${questionnaire.assetTypes.join(", ")}
+${objectivesLabel}: ${objectives}
 Estimated Value: ${questionnaire.estimatedValue}
 Revenue Model: ${questionnaire.revenueModel}
 Target Investors: ${questionnaire.targetInvestors}
-Token Standard: ${questionnaire.tokenStandard}
 Regulatory Notes: ${questionnaire.regulatoryNotes}
+${challengeBlock}
 
-Generate a report with exactly 6 sections. Each section should have 300-500 words.
+${CASE_STUDY_BANK}
+${PARTNER_CREDENTIALS}
+
+Generate a report with exactly 7 sections. Each section should have 300-500 words.
 Use markdown formatting within the content strings to create visual structure:
 ${FORMATTING_RULES}
 
-Use the submit_report tool to return your report. The 6 section titles must be exactly: "Asset Analysis", "Token Economics", "Regulatory Framework", "Smart Contract Architecture", "Go-to-Market Strategy", "Financial Projections".`;
+Use the submit_report tool to return your report. The 7 section titles must be exactly: "Executive Summary", "Tokenisation Opportunities", "Market Validation", "Implementation Plan", "Financial Outlook", "Opportunity Cost", "Your Partners".
+
+IMPORTANT TONE: Write for a CEO/CFO, not a blockchain developer. Lead with business outcomes, not technical mechanisms. Use "tokenisation" as a means to an end (capital, liquidity, access), never as the goal itself.`;
 }
 
 export async function prefillQuestionnaire(
@@ -154,7 +202,7 @@ export async function generateReport(
 
   const response = await client.messages.create({
     model: REPORT_MODEL,
-    max_tokens: 8000,
+    max_tokens: 12000,
     tools: [REPORT_TOOL],
     tool_choice: { type: "tool", name: "submit_report" },
     messages: [
@@ -221,15 +269,26 @@ export async function refineReport(
     .map((s) => `## ${s.title}\n${s.content}`)
     .join("\n\n");
 
+  const objectives = updatedQuestionnaire.businessObjectives?.length
+    ? updatedQuestionnaire.businessObjectives.join(", ")
+    : updatedQuestionnaire.assetTypes.join(", ");
+  const objectivesLabel = updatedQuestionnaire.businessObjectives?.length
+    ? "Business Objectives"
+    : "Asset Types (legacy)";
+
+  const challengeBlock = updatedQuestionnaire.biggestChallenge
+    ? `Biggest Challenge: ${updatedQuestionnaire.biggestChallenge}`
+    : "";
+
   const response = await client.messages.create({
     model: REPORT_MODEL,
-    max_tokens: 8000,
+    max_tokens: 12000,
     tools: [REPORT_TOOL],
     tool_choice: { type: "tool", name: "submit_report" },
     messages: [
       {
         role: "user",
-        content: `You are a senior tokenisation advisor at Deca4 Advisory. You previously generated a tokenisation report for ${updatedQuestionnaire.companyName} (${url}).
+        content: `You are a senior tokenisation advisor writing for a business executive. You previously generated a tokenisation report for ${updatedQuestionnaire.companyName} (${url}).
 
 The client has updated their details. Here are the changes:
 ${changesSummary}
@@ -238,12 +297,14 @@ Updated company details:
 Company: ${updatedQuestionnaire.companyName}
 Industry: ${updatedQuestionnaire.industry}
 Jurisdiction: ${updatedQuestionnaire.jurisdiction}
-Asset Types: ${updatedQuestionnaire.assetTypes.join(", ")}
+${objectivesLabel}: ${objectives}
 Estimated Value: ${updatedQuestionnaire.estimatedValue}
 Revenue Model: ${updatedQuestionnaire.revenueModel}
 Target Investors: ${updatedQuestionnaire.targetInvestors}
-Token Standard: ${updatedQuestionnaire.tokenStandard}
 Regulatory Notes: ${updatedQuestionnaire.regulatoryNotes}
+${challengeBlock}
+
+${PARTNER_CREDENTIALS}
 
 Here is the existing draft report:
 ${existingReportText}
@@ -251,7 +312,9 @@ ${existingReportText}
 Update the report to reflect the changes above. Keep sections that are unaffected by the changes largely intact. Only rewrite sections that are materially impacted. Maintain the same quality and depth.
 ${FORMATTING_RULES}
 
-Use the submit_report tool to return all 6 updated sections. The 6 section titles must be exactly: "Asset Analysis", "Token Economics", "Regulatory Framework", "Smart Contract Architecture", "Go-to-Market Strategy", "Financial Projections".`,
+Use the submit_report tool to return all 7 updated sections. The 7 section titles must be exactly: "Executive Summary", "Tokenisation Opportunities", "Market Validation", "Implementation Plan", "Financial Outlook", "Opportunity Cost", "Your Partners".
+
+IMPORTANT TONE: Write for a CEO/CFO, not a blockchain developer. Lead with business outcomes, not technical mechanisms.`,
       },
     ],
   });

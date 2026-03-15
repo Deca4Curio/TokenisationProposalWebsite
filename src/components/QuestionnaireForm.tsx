@@ -19,6 +19,8 @@ const FIELD_LABELS: Record<keyof Questionnaire, string> = {
   targetInvestors: "Target Investors",
   tokenStandard: "Token Standard",
   regulatoryNotes: "Regulatory Notes",
+  businessObjectives: "Business Objectives",
+  biggestChallenge: "Biggest Challenge",
 };
 
 const FIELD_DESCRIPTIONS: Record<keyof Questionnaire, string> = {
@@ -31,6 +33,8 @@ const FIELD_DESCRIPTIONS: Record<keyof Questionnaire, string> = {
   targetInvestors: "Who will invest in the tokens",
   tokenStandard: "Recommended blockchain token standard",
   regulatoryNotes: "Key regulatory considerations",
+  businessObjectives: "What are your business objectives",
+  biggestChallenge: "What is your biggest challenge today",
 };
 
 export default function QuestionnaireForm({ initial, onSubmit, loading }: QuestionnaireFormProps) {

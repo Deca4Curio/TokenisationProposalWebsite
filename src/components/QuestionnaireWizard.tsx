@@ -6,7 +6,7 @@ import type {
   Questionnaire,
   ContactInfo,
   CompanyInfo,
-  TokenisationGoal,
+  BusinessObjective,
   TokenisationDetails,
 } from "@/types";
 
@@ -27,7 +27,7 @@ interface QuestionnaireWizardProps {
 
 // ─── Step indicator ──────────────────────────────────────────────────────────
 
-const STEP_LABELS = ["Your Details", "Your Company", "Tokenisation Goals", "Details", "Review & Book"];
+const STEP_LABELS = ["Your Details", "Your Company", "Business Objectives", "Details", "Review & Book"];
 
 function StepIndicator({ current, total }: { current: number; total: number }) {
   return (
@@ -153,73 +153,48 @@ function TextArea({
   );
 }
 
-// ─── Goal cards ──────────────────────────────────────────────────────────────
+// ─── Objective cards ─────────────────────────────────────────────────────────
 
-interface GoalOption {
-  id: TokenisationGoal;
+interface ObjectiveOption {
+  id: BusinessObjective;
   title: string;
   description: string;
   icon: string;
 }
 
-function getGoalOptions(industry: string): GoalOption[] {
-  // Dynamic third option based on company type
-  const lower = industry.toLowerCase();
-  let thirdOption: GoalOption;
+const OBJECTIVE_OPTIONS: ObjectiveOption[] = [
+  {
+    id: "raise_capital",
+    title: "Raise capital from global investors",
+    description: "Access a worldwide pool of investors through fractional, blockchain-based securities.",
+    icon: "M13 2L3 14h9l-1 8 10-12h-9l1-8z",
+  },
+  {
+    id: "unlock_liquidity",
+    title: "Unlock liquidity from existing assets",
+    description: "Turn illiquid assets into tradeable digital tokens with secondary market access.",
+    icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+  },
+  {
+    id: "new_revenue",
+    title: "Generate new revenue streams",
+    description: "Create new fee-based models through tokenised products, royalties, or yield structures.",
+    icon: "M13 7h8m0 0v8m0-8l-8 8-4-4-6 6",
+  },
+  {
+    id: "expand_access",
+    title: "Expand investor access",
+    description: "Lower minimum investments and open your offering to a broader, more diverse investor base.",
+    icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z",
+  },
+];
 
-  if (lower.includes("fund") || lower.includes("invest") || lower.includes("asset management") || lower.includes("capital")) {
-    thirdOption = {
-      id: "inventory_product_fund",
-      title: "Tokenise a Fund",
-      description: "Create tokenised fund units for fractional investment access and secondary market liquidity.",
-      icon: "M2 7a2 2 0 012-2h16a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V7zm2 0v10h16V7H4z",
-    };
-  } else if (lower.includes("real estate") || lower.includes("property") || lower.includes("reit")) {
-    thirdOption = {
-      id: "inventory_product_fund",
-      title: "Tokenise Property",
-      description: "Fractionalise real estate assets for broader investor access and liquidity.",
-      icon: "M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3",
-    };
-  } else if (lower.includes("commodity") || lower.includes("oil") || lower.includes("mining") || lower.includes("agriculture")) {
-    thirdOption = {
-      id: "inventory_product_fund",
-      title: "Tokenise Commodities",
-      description: "Create digital representations of physical commodities for fractional trading.",
-      icon: "M20.24 12.24a6 6 0 00-8.49-8.49L5 10.5V19h8.5zM16 8L2 22M17.5 15H9",
-    };
-  } else {
-    thirdOption = {
-      id: "inventory_product_fund",
-      title: "Tokenise Inventory / Product",
-      description: "Tokenise physical or digital inventory, IP, or product-backed assets for new financing models.",
-      icon: "M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z",
-    };
-  }
-
-  return [
-    {
-      id: "equity",
-      title: "Tokenise Equity",
-      description: "Convert company shares into digital tokens for broader investor access and secondary market trading.",
-      icon: "M13 2L3 14h9l-1 8 10-12h-9l1-8z",
-    },
-    {
-      id: "debt",
-      title: "Issue Tokenised Debt",
-      description: "Create blockchain-based bonds or debt instruments with automated coupon payments and transparent terms.",
-      icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
-    },
-    thirdOption,
-  ];
-}
-
-function GoalCard({
+function ObjectiveCard({
   option,
   selected,
   onToggle,
 }: {
-  option: GoalOption;
+  option: ObjectiveOption;
   selected: boolean;
   onToggle: () => void;
 }) {
@@ -275,15 +250,15 @@ function GoalCard({
 
 const REPORT_SECTIONS = [
   "Executive Summary",
-  "Asset Analysis",
-  "Token Economics",
-  "Regulatory Framework",
-  "Smart Contract Architecture",
-  "Go-to-Market Strategy",
-  "Financial Projections",
+  "Tokenisation Opportunities",
+  "Market Validation",
+  "Implementation Plan",
+  "Financial Outlook",
+  "Opportunity Cost",
+  "Your Partners",
 ];
 
-function ReportOutline({ goals }: { goals: TokenisationGoal[] }) {
+function ReportOutline() {
   return (
     <div className="rounded-xl p-5" style={{ background: "var(--feature-bg)", border: "1px solid var(--border)" }}>
       <p className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
@@ -298,30 +273,6 @@ function ReportOutline({ goals }: { goals: TokenisationGoal[] }) {
             <span className="text-sm" style={{ color: "var(--text-secondary)" }}>{section}</span>
           </div>
         ))}
-        {goals.includes("equity") && (
-          <div className="flex items-center gap-2">
-            <svg className="h-3.5 w-3.5 text-[var(--color-purple)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            <span className="text-sm" style={{ color: "var(--text-secondary)" }}>Equity Tokenisation Specifics</span>
-          </div>
-        )}
-        {goals.includes("debt") && (
-          <div className="flex items-center gap-2">
-            <svg className="h-3.5 w-3.5 text-[var(--color-purple)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            <span className="text-sm" style={{ color: "var(--text-secondary)" }}>Debt Instrument Structure</span>
-          </div>
-        )}
-        {goals.includes("inventory_product_fund") && (
-          <div className="flex items-center gap-2">
-            <svg className="h-3.5 w-3.5 text-[var(--color-purple)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            <span className="text-sm" style={{ color: "var(--text-secondary)" }}>Asset-Specific Tokenisation Plan</span>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -350,18 +301,18 @@ export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit
   });
   const [researchDone, setResearchDone] = useState(false);
 
-  // Step 3: Goals
-  const [goals, setGoals] = useState<TokenisationGoal[]>([]);
+  // Step 3: Business Objectives
+  const [objectives, setObjectives] = useState<BusinessObjective[]>([]);
 
   // Step 4: Details
   const [details, setDetails] = useState<TokenisationDetails>({
-    goals: [],
+    objectives: [],
     estimatedValue: initial.estimatedValue || "",
     jurisdiction: initial.jurisdiction || "",
     targetInvestors: initial.targetInvestors || "",
     timeline: "",
     existingStructure: "",
-    offeringType: "",
+    biggestChallenge: "",
   });
 
   // Simulate research on step 2
@@ -372,10 +323,8 @@ export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit
     }
   }, [step, researchDone]);
 
-  const goalOptions = getGoalOptions(company.industry);
-
-  const toggleGoal = useCallback((id: TokenisationGoal) => {
-    setGoals((prev) => (prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]));
+  const toggleObjective = useCallback((id: BusinessObjective) => {
+    setObjectives((prev) => (prev.includes(id) ? prev.filter((o) => o !== id) : [...prev, id]));
   }, []);
 
   // Convert wizard data back to legacy Questionnaire for API
@@ -384,25 +333,28 @@ export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit
       companyName: company.companyName,
       industry: company.industry,
       jurisdiction: details.jurisdiction,
-      assetTypes: goals.map((g) => {
-        if (g === "equity") return "Equity";
-        if (g === "debt") return "Debt";
-        return goalOptions.find((o) => o.id === g)?.title.replace("Tokenise ", "") || "Other";
-      }),
+      assetTypes: [],
       estimatedValue: details.estimatedValue,
       revenueModel: company.shortDescription,
       targetInvestors: details.targetInvestors,
       tokenStandard: "",
-      regulatoryNotes: `Timeline: ${details.timeline}\nExisting structure: ${details.existingStructure}\nOffering type: ${details.offeringType}\nContact: ${contact.fullName}, ${contact.role}, ${contact.phone}`,
+      regulatoryNotes: `Timeline: ${details.timeline}\nExisting structure: ${details.existingStructure}\nContact: ${contact.fullName}, ${contact.role}, ${contact.phone}`,
+      businessObjectives: objectives.map((o) => {
+        if (o === "raise_capital") return "Raise capital from global investors";
+        if (o === "unlock_liquidity") return "Unlock liquidity from existing assets";
+        if (o === "new_revenue") return "Generate new revenue streams";
+        return "Expand investor access";
+      }),
+      biggestChallenge: details.biggestChallenge,
     };
     onSubmit(q);
-  }, [company, details, goals, contact, goalOptions, onSubmit]);
+  }, [company, details, objectives, contact, onSubmit]);
 
   const canProceed = (): boolean => {
     switch (step) {
       case 0: return !!(contact.fullName && contact.phone && contact.role);
       case 1: return researchDone && !!company.companyName;
-      case 2: return goals.length > 0;
+      case 2: return objectives.length > 0;
       case 3: return !!(details.estimatedValue && details.jurisdiction);
       default: return true;
     }
@@ -528,32 +480,32 @@ export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit
           </div>
         );
 
-      // ── Step 3: Tokenisation Goals ────────────────────────────────────────
+      // ── Step 3: Business Objectives ──────────────────────────────────────
       case 2:
         return (
           <div className="animate-fade-in flex flex-col gap-6">
             <div className="text-center">
               <h1 className="text-2xl font-bold sm:text-3xl" style={{ color: "var(--text-primary)" }}>
-                What do you want to tokenise?
+                What are your business objectives?
               </h1>
               <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-                Select all that apply. We&apos;ll tailor your report to each goal.
+                Select all that apply. We&apos;ll tailor your report to each objective.
               </p>
             </div>
 
             <div className="flex flex-col gap-3">
-              {goalOptions.map((option) => (
-                <GoalCard
+              {OBJECTIVE_OPTIONS.map((option) => (
+                <ObjectiveCard
                   key={option.id}
                   option={option}
-                  selected={goals.includes(option.id)}
-                  onToggle={() => toggleGoal(option.id)}
+                  selected={objectives.includes(option.id)}
+                  onToggle={() => toggleObjective(option.id)}
                 />
               ))}
             </div>
 
             {/* Report outline preview */}
-            <ReportOutline goals={goals} />
+            <ReportOutline />
           </div>
         );
 
@@ -603,7 +555,7 @@ export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit
                 />
               </Field>
 
-              <Field label="Existing legal structure" hint="Do you have an SPV, fund, or holding company?">
+              <Field label="Existing legal structure" hint="Do you have a holding company, fund, or SPV?">
                 <TextInput
                   value={details.existingStructure}
                   onChange={(v) => setDetails((d) => ({ ...d, existingStructure: v }))}
@@ -611,11 +563,12 @@ export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit
                 />
               </Field>
 
-              <Field label="Offering type" hint="What are you selling to investors?">
-                <TextInput
-                  value={details.offeringType}
-                  onChange={(v) => setDetails((d) => ({ ...d, offeringType: v }))}
-                  placeholder="e.g. Equity, debt, revenue share, utility tokens"
+              <Field label="What's your biggest challenge today?" hint="What's holding you back from achieving your objectives?">
+                <TextArea
+                  value={details.biggestChallenge}
+                  onChange={(v) => setDetails((d) => ({ ...d, biggestChallenge: v }))}
+                  rows={3}
+                  placeholder="e.g. Can't access international investors, assets are illiquid, high intermediary costs"
                 />
               </Field>
             </div>
@@ -657,17 +610,17 @@ export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit
                 <p className="text-xs" style={{ color: "var(--text-secondary)" }}>{company.industry}</p>
               </div>
 
-              {/* Goals */}
+              {/* Objectives */}
               <div className="rounded-xl p-4" style={{ background: "var(--bg-input)", border: "1px solid var(--border)" }}>
                 <div className="mb-2 flex items-center justify-between">
-                  <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Goals</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Objectives</p>
                   <button onClick={() => setStep(2)} className="text-xs" style={{ color: "var(--accent)" }}>Edit</button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {goals.map((g) => {
-                    const opt = goalOptions.find((o) => o.id === g);
+                  {objectives.map((o) => {
+                    const opt = OBJECTIVE_OPTIONS.find((opt) => opt.id === o);
                     return (
-                      <span key={g} className="rounded-full px-3 py-1 text-xs font-medium" style={{ background: "var(--badge-bg)", color: "var(--accent)" }}>
+                      <span key={o} className="rounded-full px-3 py-1 text-xs font-medium" style={{ background: "var(--badge-bg)", color: "var(--accent)" }}>
                         {opt?.title}
                       </span>
                     );
@@ -687,11 +640,16 @@ export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit
                   <span>Timeline: {details.timeline || "—"}</span>
                   <span>Structure: {details.existingStructure || "—"}</span>
                 </div>
+                {details.biggestChallenge && (
+                  <p className="mt-2 text-xs" style={{ color: "var(--text-secondary)" }}>
+                    Challenge: {details.biggestChallenge}
+                  </p>
+                )}
               </div>
             </div>
 
             {/* Report outline */}
-            <ReportOutline goals={goals} />
+            <ReportOutline />
 
             {/* Book a call option */}
             <div className="rounded-xl p-5 text-center" style={{ background: "var(--feature-bg)", border: "1px solid var(--border)" }}>
@@ -744,7 +702,7 @@ export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit
             onClick={() => {
               const nextStep = step + 1;
               setStep(nextStep);
-              // After Step 3 (goals), fire pre-generation in background
+              // After Step 3 (objectives), fire pre-generation in background
               if (step === 2 && !pregenerateFired) {
                 setPregenerateFired(true);
                 const partialQ: Questionnaire = {
@@ -753,10 +711,12 @@ export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit
                   industry: company.industry,
                   revenueModel: company.shortDescription,
                   regulatoryNotes: company.detailedSummary,
-                  assetTypes: goals.map((g) => {
-                    if (g === "equity") return "Equity";
-                    if (g === "debt") return "Debt";
-                    return goalOptions.find((o) => o.id === g)?.title.replace("Tokenise ", "") || "Other";
+                  assetTypes: [],
+                  businessObjectives: objectives.map((o) => {
+                    if (o === "raise_capital") return "Raise capital from global investors";
+                    if (o === "unlock_liquidity") return "Unlock liquidity from existing assets";
+                    if (o === "new_revenue") return "Generate new revenue streams";
+                    return "Expand investor access";
                   }),
                 };
                 fetch(`/api/proposals/${proposalId}/pregenerate`, {

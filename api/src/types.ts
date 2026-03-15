@@ -35,6 +35,8 @@ export interface Questionnaire {
   targetInvestors: string;
   tokenStandard: string;
   regulatoryNotes: string;
+  businessObjectives?: string[];
+  biggestChallenge?: string;
 }
 
 export interface ReportSection {

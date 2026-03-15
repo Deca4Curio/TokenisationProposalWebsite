@@ -39,7 +39,13 @@ export function extractMetrics(questionnaire?: Questionnaire): MetricItem[] {
     });
   }
 
-  if (questionnaire.assetTypes?.length) {
+  if (questionnaire.businessObjectives?.length) {
+    metrics.push({
+      icon: "lightbulb",
+      value: questionnaire.businessObjectives.join(", "),
+      label: "Objectives",
+    });
+  } else if (questionnaire.assetTypes?.length) {
     metrics.push({
       icon: "chain",
       value: questionnaire.assetTypes.join(", "),
