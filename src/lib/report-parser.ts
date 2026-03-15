@@ -111,15 +111,47 @@ export function parseContent(markdown: string): ContentBlock[] {
     }
 
     // Timeline: Phase N: / Month N-N: / Year N: patterns
+    // Collect phase headers with their following description paragraphs
     if (/^(?:- )?\*\*(?:Phase|Month|Year|Quarter|Stage|Step)\s+\d/i.test(line.trim())) {
       const phases: TimelinePhase[] = [];
-      while (i < lines.length && /^(?:- )?\*\*(?:Phase|Month|Year|Quarter|Stage|Step)\s+\d/i.test(lines[i]?.trim() || "")) {
-        const match = lines[i].trim().match(/^\*\*(.+?)\*\*[:\s]*(.*)$/) ||
-          lines[i].trim().match(/^- \*\*(.+?)\*\*[:\s]*(.*)$/);
-        if (match) {
-          phases.push({ title: match[1], description: match[2] || "" });
+      while (i < lines.length) {
+        const currentLine = lines[i]?.trim() || "";
+        // Check if this line is a phase header
+        if (/^(?:- )?\*\*(?:Phase|Month|Year|Quarter|Stage|Step)\s+\d/i.test(currentLine)) {
+          const match = currentLine.match(/^\*\*(.+?)\*\*[:\s]*(.*)$/) ||
+            currentLine.match(/^- \*\*(.+?)\*\*[:\s]*(.*)$/);
+          if (match) {
+            phases.push({ title: match[1], description: match[2] || "" });
+          }
+          i++;
+          // Collect following description lines until next phase header, blank line gap, or structural element
+          const descLines: string[] = [];
+          // Skip one blank line if present
+          if (i < lines.length && lines[i].trim() === "") i++;
+          while (
+            i < lines.length &&
+            lines[i].trim() !== "" &&
+            !/^(?:- )?\*\*(?:Phase|Month|Year|Quarter|Stage|Step)\s+\d/i.test(lines[i].trim()) &&
+            !lines[i].trim().startsWith("|") &&
+            !/^#{2,3}\s+/.test(lines[i]) &&
+            !lines[i].trim().startsWith(">") &&
+            !/^[A-Z][^*|>\-#]*:\s*$/.test(lines[i].trim())
+          ) {
+            descLines.push(lines[i].trim());
+            i++;
+          }
+          if (descLines.length > 0 && phases.length > 0) {
+            const last = phases[phases.length - 1];
+            last.description = last.description
+              ? last.description + " " + descLines.join(" ")
+              : descLines.join(" ");
+          }
+          // Skip blank lines between phases
+          while (i < lines.length && lines[i]?.trim() === "") i++;
+        } else {
+          // Not a phase header, stop collecting
+          break;
         }
-        i++;
       }
       if (phases.length > 0) {
         blocks.push({ type: "timeline", data: phases });

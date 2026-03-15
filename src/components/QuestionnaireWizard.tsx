@@ -153,6 +153,15 @@ function TextArea({
   );
 }
 
+// ─── Main need options ───────────────────────────────────────────────────────
+
+const MAIN_NEED_OPTIONS = [
+  { id: "feasibility", label: "Understand if tokenisation fits my business" },
+  { id: "strategy", label: "Get a full tokenisation strategy" },
+  { id: "investor_ready", label: "Create an investor-ready proposal" },
+  { id: "exploring", label: "Just exploring options" },
+];
+
 // ─── Objective cards ─────────────────────────────────────────────────────────
 
 interface ObjectiveOption {
@@ -300,6 +309,7 @@ export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit
     detailedSummary: initial.regulatoryNotes || "",
   });
   const [researchDone, setResearchDone] = useState(false);
+  const [mainNeed, setMainNeed] = useState("");
 
   // Step 3: Business Objectives
   const [objectives, setObjectives] = useState<BusinessObjective[]>([]);
@@ -338,7 +348,7 @@ export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit
       revenueModel: company.shortDescription,
       targetInvestors: details.targetInvestors,
       tokenStandard: "",
-      regulatoryNotes: `Timeline: ${details.timeline}\nExisting structure: ${details.existingStructure}\nContact: ${contact.fullName}, ${contact.role}, ${contact.phone}`,
+      regulatoryNotes: `Main need: ${MAIN_NEED_OPTIONS.find((o) => o.id === mainNeed)?.label || mainNeed}\nTimeline: ${details.timeline}\nExisting structure: ${details.existingStructure}\nContact: ${contact.fullName}, ${contact.role}, ${contact.phone}`,
       businessObjectives: objectives.map((o) => {
         if (o === "raise_capital") return "Raise capital from global investors";
         if (o === "unlock_liquidity") return "Unlock liquidity from existing assets";
@@ -353,7 +363,7 @@ export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit
   const canProceed = (): boolean => {
     switch (step) {
       case 0: return !!(contact.fullName && contact.phone && contact.role);
-      case 1: return researchDone && !!company.companyName;
+      case 1: return researchDone && !!company.companyName && !!mainNeed;
       case 2: return objectives.length > 0;
       case 3: return !!(details.estimatedValue && details.jurisdiction);
       default: return true;
@@ -474,6 +484,28 @@ export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit
                     rows={5}
                     placeholder="Describe your business model, products, and services..."
                   />
+                </Field>
+
+                {/* Main need selector */}
+                <Field label="What are you looking for?" required>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {MAIN_NEED_OPTIONS.map((option) => (
+                      <button
+                        key={option.id}
+                        type="button"
+                        onClick={() => setMainNeed(option.id)}
+                        className="rounded-xl px-4 py-3 text-left text-sm transition-all"
+                        style={{
+                          background: mainNeed === option.id ? "var(--badge-bg)" : "var(--bg-input)",
+                          border: mainNeed === option.id ? "2px solid var(--color-teal)" : "2px solid var(--border)",
+                          color: mainNeed === option.id ? "var(--accent)" : "var(--text-secondary)",
+                          fontWeight: mainNeed === option.id ? 600 : 400,
+                        }}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
                 </Field>
               </div>
             )}
@@ -608,6 +640,11 @@ export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit
                 </div>
                 <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{company.companyName}</p>
                 <p className="text-xs" style={{ color: "var(--text-secondary)" }}>{company.industry}</p>
+                {mainNeed && (
+                  <p className="mt-1 text-xs" style={{ color: "var(--text-secondary)" }}>
+                    Looking for: {MAIN_NEED_OPTIONS.find((o) => o.id === mainNeed)?.label}
+                  </p>
+                )}
               </div>
 
               {/* Objectives */}
