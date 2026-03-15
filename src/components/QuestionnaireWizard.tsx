@@ -17,6 +17,8 @@ interface QuestionnaireWizardProps {
   initial: Questionnaire;
   /** The URL that was scraped */
   url: string;
+  /** The proposal ID for pre-generation */
+  proposalId: string;
   /** Called when user completes the wizard */
   onSubmit: (questionnaire: Questionnaire) => void;
   /** Whether final submission is in progress */
@@ -327,8 +329,9 @@ function ReportOutline({ goals }: { goals: TokenisationGoal[] }) {
 
 // ─── Main Wizard ─────────────────────────────────────────────────────────────
 
-export default function QuestionnaireWizard({ initial, url, onSubmit, loading }: QuestionnaireWizardProps) {
+export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit, loading }: QuestionnaireWizardProps) {
   const [step, setStep] = useState(0);
+  const [pregenerateFired, setPregenerateFired] = useState(false);
 
   // Step 1: Contact
   const [contact, setContact] = useState<ContactInfo>({
@@ -738,7 +741,31 @@ export default function QuestionnaireWizard({ initial, url, onSubmit, loading }:
         {step < STEP_LABELS.length - 1 ? (
           <button
             type="button"
-            onClick={() => setStep((s) => s + 1)}
+            onClick={() => {
+              const nextStep = step + 1;
+              setStep(nextStep);
+              // After Step 3 (goals), fire pre-generation in background
+              if (step === 2 && !pregenerateFired) {
+                setPregenerateFired(true);
+                const partialQ: Questionnaire = {
+                  ...initial,
+                  companyName: company.companyName,
+                  industry: company.industry,
+                  revenueModel: company.shortDescription,
+                  regulatoryNotes: company.detailedSummary,
+                  assetTypes: goals.map((g) => {
+                    if (g === "equity") return "Equity";
+                    if (g === "debt") return "Debt";
+                    return goalOptions.find((o) => o.id === g)?.title.replace("Tokenise ", "") || "Other";
+                  }),
+                };
+                fetch(`/api/proposals/${proposalId}/pregenerate`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(partialQ),
+                }).catch(() => {}); // fire and forget
+              }
+            }}
             disabled={!canProceed()}
             className="flex-1 rounded-xl py-3.5 text-base font-semibold text-white transition-all disabled:opacity-40"
             style={{

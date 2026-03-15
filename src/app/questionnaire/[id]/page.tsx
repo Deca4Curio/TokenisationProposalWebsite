@@ -212,6 +212,7 @@ export default function QuestionnairePage() {
           <QuestionnaireWizard
             initial={proposal.questionnaire}
             url={proposal.url}
+            proposalId={id}
             onSubmit={handleSubmit}
             loading={submitting}
           />

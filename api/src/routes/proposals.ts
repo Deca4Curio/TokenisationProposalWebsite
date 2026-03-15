@@ -2,7 +2,7 @@ import { Router } from "express";
 import { v4 as uuidv4 } from "uuid";
 import { getDb } from "../lib/firebase.js";
 import { scrapeUrl } from "../lib/firecrawl.js";
-import { prefillQuestionnaire, generateReport } from "../lib/claude.js";
+import { prefillQuestionnaire, generateReport, refineReport, getChangedFields } from "../lib/claude.js";
 import type { Questionnaire } from "../types.js";
 
 const router = Router();
@@ -187,7 +187,69 @@ router.put("/:id/questionnaire", async (req, res) => {
   }
 });
 
+// POST /proposals/:id/pregenerate
+// Kicks off report generation in background using current questionnaire data.
+// Called after wizard Step 3 so the report starts generating while user fills Step 4-5.
+router.post("/:id/pregenerate", async (req, res) => {
+  try {
+    const userId = await getUserId(req);
+    if (!userId) {
+      res.status(401).json({ error: "Not authenticated" });
+      return;
+    }
+
+    const db = getDb();
+    const doc = await db.collection("proposals").doc(req.params.id).get();
+    if (!doc.exists) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
+
+    const data = doc.data()!;
+    if (data.userId !== userId) {
+      res.status(403).json({ error: "Forbidden" });
+      return;
+    }
+
+    // Use the partial questionnaire from the request body (company + goals from Steps 2-3)
+    // merged with the AI-prefilled defaults for fields the user hasn't touched yet
+    const partialQuestionnaire: Questionnaire = {
+      ...data.questionnaire,
+      ...req.body,
+    };
+
+    // Store what we're pre-generating with so we can diff later
+    await db.collection("proposals").doc(req.params.id).update({
+      pregenerateQuestionnaire: partialQuestionnaire,
+      updatedAt: new Date().toISOString(),
+    });
+
+    // Respond immediately, generate in background
+    res.json({ status: "pregenerating" });
+
+    // Fire and forget: generate report asynchronously
+    generateReport(data.url, partialQuestionnaire)
+      .then(async (report) => {
+        await db.collection("proposals").doc(req.params.id).update({
+          pregeneratedReport: report,
+          updatedAt: new Date().toISOString(),
+        });
+        console.log(`Pre-generated report for proposal ${req.params.id}`);
+      })
+      .catch((err) => {
+        console.error(`Pre-generation failed for ${req.params.id}:`, err);
+        // Don't set error status - user can still generate normally
+      });
+  } catch (error) {
+    console.error("Pregenerate error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // POST /proposals/:id/report
+// Final report generation. If a pre-generated report exists and the questionnaire
+// hasn't changed significantly, returns it immediately. If fields changed, refines
+// the pre-generated draft. If no pre-generation exists, generates from scratch.
 router.post("/:id/report", async (req, res) => {
   try {
     const userId = await getUserId(req);
@@ -209,8 +271,8 @@ router.post("/:id/report", async (req, res) => {
       return;
     }
 
-    const questionnaire = data.questionnaireSubmitted || data.questionnaire;
-    if (!questionnaire) {
+    const finalQuestionnaire = data.questionnaireSubmitted || data.questionnaire;
+    if (!finalQuestionnaire) {
       res.status(400).json({ error: "Questionnaire not yet completed" });
       return;
     }
@@ -222,7 +284,28 @@ router.post("/:id/report", async (req, res) => {
 
     let report;
     try {
-      report = await generateReport(data.url, questionnaire);
+      const pregeneratedReport = data.pregeneratedReport;
+      const pregenerateQuestionnaire = data.pregenerateQuestionnaire;
+
+      if (pregeneratedReport && pregenerateQuestionnaire) {
+        // We have a pre-generated report. Check if anything changed.
+        const changes = getChangedFields(pregenerateQuestionnaire, finalQuestionnaire);
+        const changedKeys = Object.keys(changes);
+
+        if (changedKeys.length === 0) {
+          // Nothing changed, use pre-generated report as-is
+          console.log(`Using pre-generated report for ${req.params.id} (no changes)`);
+          report = pregeneratedReport;
+        } else {
+          // Fields changed, refine the report
+          console.log(`Refining pre-generated report for ${req.params.id} (${changedKeys.length} changes: ${changedKeys.join(", ")})`);
+          report = await refineReport(data.url, finalQuestionnaire, pregeneratedReport, changes);
+        }
+      } else {
+        // No pre-generated report, generate from scratch
+        console.log(`Generating report from scratch for ${req.params.id}`);
+        report = await generateReport(data.url, finalQuestionnaire);
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Report generation failed";
       await db.collection("proposals").doc(req.params.id).update({
