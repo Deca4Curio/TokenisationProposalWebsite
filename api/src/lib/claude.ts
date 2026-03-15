@@ -20,8 +20,32 @@ function cleanJsonString(text: string): string {
   return cleaned;
 }
 
+const FORMATTING_RULES = `
+FORMATTING RULES:
+- Use **Bold Label:** Value pairs on consecutive lines for key metrics (3+ in a row)
+- Use - **Title:** Description for feature/item lists (2+ items)
+- Use | Col | Col | tables with --- separator rows for comparisons
+- Use **Phase N:** or **Month N-N:** on consecutive lines for timelines
+- Use ## Subheading for sub-sections within a section
+- Use > for important quotes or key takeaways
+- Use **Note:** or **Key Insight:** to start callout paragraphs
+- Mix prose paragraphs between structured elements for readability
+
+SECTION-SPECIFIC GUIDANCE:
+1. Asset Analysis: Start with a prose overview, then use **bold:** value pairs for key asset characteristics (e.g. **Asset Class:** Real Estate, **Estimated Value:** $50M, **Jurisdiction:** UAE, **Ownership Structure:** Freehold). End with a key insight callout.
+
+2. Token Economics: Use a | table | for token distribution/allocation. Use **bold:** value pairs for token specs (supply, price, minimum investment). Prose for yield mechanism explanation.
+
+3. Regulatory Framework: Use - **Requirement:** Description cards for compliance items. A | table | comparing regulatory options if relevant. Prose for jurisdiction analysis.
+
+4. Smart Contract Architecture: Use - **Component:** Description cards for contract modules. A **Phase N:** timeline for deployment stages.
+
+5. Go-to-Market Strategy: Use **Phase N:** timeline for launch phases. Use - **Channel:** Description cards for marketing channels.
+
+6. Financial Projections: Use a | table | for year-by-year projections. Use **bold:** value pairs for key financial metrics (ROI, yield, break-even). End with a key insight callout.`;
+
 function buildReportPrompt(url: string, questionnaire: Questionnaire): string {
-  return `You are a senior tokenisation advisor at Deca4 Advisory, a blockchain consulting firm based in Dubai. Generate a comprehensive tokenisation proposal.
+  return `You are a senior tokenisation advisor at Deca4 Advisory, a blockchain consulting firm based in Dubai. Generate a comprehensive tokenisation report.
 
 Company: ${questionnaire.companyName}
 Website: ${url}
@@ -34,9 +58,11 @@ Target Investors: ${questionnaire.targetInvestors}
 Token Standard: ${questionnaire.tokenStandard}
 Regulatory Notes: ${questionnaire.regulatoryNotes}
 
-Generate a proposal with exactly 6 sections. Each section should have 300-500 words.
+Generate a report with exactly 6 sections. Each section should have 300-500 words.
+Use markdown formatting within the content strings to create visual structure:
+${FORMATTING_RULES}
 
-CRITICAL: Respond with ONLY a valid JSON array. No markdown code fences, no extra text. All strings must be properly JSON-escaped (use \\n for newlines within content, escape quotes with \\"). Use plain text with dashes for bullet points, not markdown.
+CRITICAL: Respond with ONLY a valid JSON array. No markdown code fences, no extra text. All strings must be properly JSON-escaped (use \\n for newlines within content, escape quotes with \\").
 
 [
   {"title": "Asset Analysis", "content": "detailed analysis text here"},
@@ -104,7 +130,7 @@ export async function generateReport(
 
   const response = await client.messages.create({
     model: REPORT_MODEL,
-    max_tokens: 6000,
+    max_tokens: 8000,
     messages: [
       {
         role: "user",
@@ -168,11 +194,11 @@ export async function refineReport(
 
   const response = await client.messages.create({
     model: REPORT_MODEL,
-    max_tokens: 6000,
+    max_tokens: 8000,
     messages: [
       {
         role: "user",
-        content: `You are a senior tokenisation advisor at Deca4 Advisory. You previously generated a tokenisation proposal for ${updatedQuestionnaire.companyName} (${url}).
+        content: `You are a senior tokenisation advisor at Deca4 Advisory. You previously generated a tokenisation report for ${updatedQuestionnaire.companyName} (${url}).
 
 The client has updated their details. Here are the changes:
 ${changesSummary}
@@ -192,6 +218,7 @@ Here is the existing draft report:
 ${existingReportText}
 
 Update the report to reflect the changes above. Keep sections that are unaffected by the changes largely intact. Only rewrite sections that are materially impacted. Maintain the same quality and depth.
+${FORMATTING_RULES}
 
 CRITICAL: Respond with ONLY a valid JSON array of all 6 updated sections. No markdown code fences. All strings must be properly JSON-escaped.
 

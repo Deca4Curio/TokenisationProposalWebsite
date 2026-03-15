@@ -66,6 +66,21 @@ export function parseContent(markdown: string): ContentBlock[] {
       continue;
     }
 
+    // Colon subheading: standalone line ending with colon (e.g. "Token Supply and Distribution:")
+    // Must be a short standalone line (no ## prefix), not a bold key-value pair
+    if (
+      /^[A-Z][^*|>\-#]*:\s*$/.test(line.trim()) &&
+      line.trim().length <= 80 &&
+      (i + 1 >= lines.length || lines[i + 1].trim() === "" || /^[^:]/.test(lines[i + 1].trim()))
+    ) {
+      blocks.push({
+        type: "subheading",
+        data: line.trim().replace(/:$/, ""),
+      });
+      i++;
+      continue;
+    }
+
     // Table: starts with |
     if (line.trim().startsWith("|") && i + 1 < lines.length && lines[i + 1]?.trim().startsWith("|")) {
       const tableLines: string[] = [];
@@ -165,7 +180,9 @@ export function parseContent(markdown: string): ContentBlock[] {
       lines[i].trim() !== "" &&
       !lines[i].trim().startsWith("|") &&
       !/^#{2,3}\s+/.test(lines[i]) &&
-      !/^(?:- )?\*\*(?:Phase|Month|Year|Quarter|Stage|Step)\s+\d/i.test(lines[i].trim())
+      !/^(?:- )?\*\*(?:Phase|Month|Year|Quarter|Stage|Step)\s+\d/i.test(lines[i].trim()) &&
+      // Stop if we hit a colon subheading
+      !/^[A-Z][^*|>\-#]*:\s*$/.test(lines[i].trim())
     ) {
       proseLines.push(lines[i]);
       i++;

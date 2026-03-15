@@ -158,18 +158,9 @@ export default function ReportPage() {
             Ready to move forward?
           </h3>
           <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-            Book a consultation with our tokenisation advisors to discuss your proposal and next steps.
+            Book a consultation with our tokenisation advisors to discuss your report and next steps.
           </p>
           <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-            <a
-              href={CALENDLY_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-xl bg-[var(--color-teal)] px-8 py-4 text-base font-semibold text-white transition-all hover:shadow-lg active:scale-95"
-              style={{ boxShadow: "0 4px 20px var(--glow-color)" }}
-            >
-              Book a Call
-            </a>
             <button
               onClick={() => window.print()}
               className="rounded-xl px-8 py-4 text-base font-medium transition-all"
@@ -177,6 +168,22 @@ export default function ReportPage() {
             >
               Download PDF
             </button>
+            <a
+              href={CALENDLY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-xl bg-[var(--color-teal)] px-8 py-4 text-base font-semibold text-white transition-all hover:shadow-lg active:scale-95"
+              style={{ boxShadow: "0 4px 20px var(--glow-color)" }}
+            >
+              Book a Consultation
+            </a>
+            <a
+              href="#"
+              className="rounded-xl px-8 py-4 text-base font-medium transition-all"
+              style={{ border: "1px solid var(--border)", color: "var(--text-secondary)", background: "var(--bg-card)" }}
+            >
+              Request a Quote
+            </a>
           </div>
         </div>
 

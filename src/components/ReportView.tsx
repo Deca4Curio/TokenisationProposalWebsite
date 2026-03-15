@@ -119,7 +119,9 @@ function renderProseMarkdown(md: string): string {
       '<a href="$2" target="_blank" rel="noopener noreferrer" class="underline" style="color: var(--accent)">$1</a>'
     )
     .replace(/^- (.+)$/gm, '<li class="ml-4 mb-1.5 pl-1">$1</li>')
-    .replace(/((?:<li[^>]*>.*<\/li>\n?)+)/g, '<ul class="list-disc mb-4 space-y-0.5">$1</ul>')
+    .replace(/((?:<li class="ml-4[^>]*>.*<\/li>\n?)+)/g, '<ul class="list-disc mb-4 space-y-0.5">$1</ul>')
+    .replace(/^\d+\.\s+(.+)$/gm, '<li class="ml-4 mb-1.5 pl-1 list-item-numbered">$1</li>')
+    .replace(/((?:<li class="ml-4[^>]*list-item-numbered[^>]*>.*<\/li>\n?)+)/g, '<ol class="list-decimal mb-4 space-y-0.5">$1</ol>')
     .replace(/^(?!<[hula])([\w$"'(].+)$/gm, '<p class="mb-3">$1</p>');
 }
 
@@ -182,7 +184,7 @@ export default function ReportView({
               fontFamily: "var(--font-heading)",
             }}
           >
-            Tokenisation Proposal
+            Tokenisation Report
           </p>
 
           <CompanyBadge url={url} companyName={companyName} favicon={siteMetadata?.favicon} size="lg" />

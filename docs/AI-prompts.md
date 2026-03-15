@@ -2,7 +2,7 @@
 
 ## Overview
 
-Two Claude API calls per proposal, running sequentially via `api/src/lib/claude.ts`.
+Two or three Claude API calls per proposal, depending on whether the user modifies the questionnaire after pre-generation.
 
 ---
 
@@ -10,77 +10,76 @@ Two Claude API calls per proposal, running sequentially via `api/src/lib/claude.
 
 **Purpose:** Extract structured business info from scraped website content
 **Current model:** Claude Sonnet 4 (`claude-sonnet-4-20250514`)
-**Planned model:** Claude Haiku 4.5 (structured extraction doesn't need Sonnet)
+**Planned model:** Claude Haiku 4.5
 **Max tokens:** 2,000
 **Latency:** ~5s (expected ~1s with Haiku)
 **Cost:** ~2-3c (expected <0.5c with Haiku)
 
-**Input:**
-- Scraped website content from Firecrawl (up to 8,000 chars of markdown)
-- Website URL
+**When:** Immediately after Firecrawl scrape, before user sees wizard
 
-**Output:** JSON object with 9 fields:
-- companyName, industry, jurisdiction
-- assetTypes (array), estimatedValue, revenueModel
-- targetInvestors, tokenStandard, regulatoryNotes
+**Input:** Scraped website markdown (up to 8K chars) + URL
 
-**Prompt approach:** Single user message asking for pure JSON output, no system prompt. Lists all field names with brief descriptions.
-
-**Decision:** Switch to Haiku 4.5 for this call. It's a structured extraction task, quality difference is negligible, and speed/cost improvement is significant.
+**Output:** JSON with 9 fields: companyName, industry, jurisdiction, assetTypes, estimatedValue, revenueModel, targetInvestors, tokenStandard, regulatoryNotes
 
 ---
 
-## Call 2: Report Generation
+## Call 2: Report Pre-generation
 
-**Purpose:** Generate a comprehensive 6-section tokenisation proposal
-**Model:** Claude Sonnet 4 (`claude-sonnet-4-20250514`)
+**Purpose:** Start generating the full report while user fills Steps 4-5
+**Model:** Claude Sonnet 4.6 (`claude-sonnet-4-6-20250627`)
 **Max tokens:** 6,000
-**Latency:** ~20-25s
+**Latency:** ~20-25s (runs in background)
 **Cost:** ~4-5c
 
-**Input:**
-- All 9 questionnaire fields (user-adjusted)
-- Website URL
-- System role: "senior tokenisation advisor at Deca4 Advisory"
+**When:** Fired in background when user clicks "Continue" after Step 3 (goals). Uses company info + goals + AI-prefilled defaults for fields the user hasn't touched yet.
 
-**Output:** JSON array of 6 sections, each 300-500 words:
-1. Asset Analysis
-2. Token Economics
-3. Regulatory Framework
-4. Smart Contract Architecture
-5. Go-to-Market Strategy
-6. Financial Projections
+**Input:** All 9 questionnaire fields (partially from user, partially defaults) + URL
 
-**Prompt approach:** Single user message requesting JSON array output. Instructs plain text with dashes for bullets (no markdown) to avoid JSON escaping issues.
-
-**Planned optimisation:** Stream the response to the browser so sections appear in real-time instead of waiting for the full response. Use `client.messages.stream()`.
+**Output:** JSON array of 6 sections, each 300-500 words
 
 ---
 
-## Optimisation Decisions
+## Call 3: Report Refinement (conditional)
 
-| Decision | Status | Impact |
-|----------|--------|--------|
-| Haiku 4.5 for questionnaire prefill | Planned | ~5x faster, ~10x cheaper |
-| Streaming for report generation | Planned | Perceived instant (sections appear live) |
-| Prompt caching (system prompt) | Considered | ~2x faster input processing on cache hits |
-| Parallel section generation | Considered | Split 6 sections into 2-3 parallel calls |
+**Purpose:** Update pre-generated report if user changed fields in Steps 4-5
+**Model:** Claude Sonnet 4.6 (`claude-sonnet-4-6-20250627`)
+**Max tokens:** 6,000
+**Latency:** ~10-15s
+**Cost:** ~4-5c
+
+**When:** Only if user modified questionnaire fields between pre-generation and final submit. Skipped entirely if nothing changed (instant report).
+
+**Input:** Existing draft report + change diff + updated questionnaire
+
+**Output:** Updated JSON array of 6 sections
+
+---
+
+## Decision Flow on Final Submit
+
+```
+User clicks "Generate Proposal" on Step 5
+  │
+  ├─ Pre-generated report exists?
+  │   ├─ YES: Compare questionnaire fields
+  │   │   ├─ No changes → USE PRE-GENERATED (instant, 0s)
+  │   │   └─ Changes found → REFINE (Call 3, ~10-15s)
+  │   └─ NO → GENERATE FROM SCRATCH (Call 2, ~20-25s)
+```
 
 ---
 
 ## Cost Per Proposal
 
-| Call | Current | After Haiku switch |
-|------|---------|-------------------|
-| Questionnaire prefill | ~2-3c | <0.5c |
-| Report generation | ~4-5c | ~4-5c (unchanged) |
-| **Total** | **~7c** | **~5c** |
+| Scenario | Calls | Cost | User wait |
+|----------|-------|------|-----------|
+| User doesn't change anything | 1 + 2 | ~7c | ~0s |
+| User changes a few fields | 1 + 2 + 3 | ~12c | ~10-15s |
+| Pre-generation fails/not ready | 1 + 2 | ~7c | ~20-25s |
+| After Haiku switch (no changes) | 1 + 2 | ~5c | ~0s |
 
 ---
 
 ## JSON Parsing
 
-Claude sometimes wraps JSON in markdown code fences or produces malformed escaping. The `cleanJsonString()` helper in `claude.ts` handles this by:
-1. Stripping markdown code fences
-2. Extracting the first JSON object or array via regex
-3. Logging raw response on parse failure for debugging
+Claude sometimes wraps JSON in markdown code fences. The `cleanJsonString()` helper handles this by stripping fences and extracting JSON via regex.
