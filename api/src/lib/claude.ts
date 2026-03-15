@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { Questionnaire, ReportSection, ScrapedPage } from "../types.js";
 
-const REPORT_MODEL = "claude-sonnet-4-20250514";
+const REPORT_MODEL = "claude-sonnet-4-6";
 const PREFILL_MODEL = "claude-sonnet-4-20250514"; // TODO: switch to Haiku 4.5
 
 function getClient(): Anthropic {
