@@ -212,7 +212,7 @@ export default function Home() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Failed to create proposal");
+        setError(data.error || "Failed to create report");
         setFlow("landing");
         return;
       }
@@ -343,11 +343,7 @@ export default function Home() {
           </h1>
 
           <p className="animate-fade-in-up max-w-xl text-lg opacity-0 delay-100 sm:text-xl" style={{ color: "var(--text-secondary)" }}>
-            We help asset managers and owners of real-world assets {"\u2014"} gold, mining, mortgages, auto finance {"\u2014"} raise institutional capital by moving their assets onchain. AI-powered reports. Proven infrastructure. Three clients per month.
-          </p>
-
-          <p className="animate-fade-in-up text-base opacity-0 delay-150" style={{ color: "var(--text-muted)" }}>
-            Understand how you could benefit.
+            Need better access to capital or new revenue streams from your inventory? Get your report and find out how tokenisation can benefit you.
           </p>
 
           {/* CTA Input */}

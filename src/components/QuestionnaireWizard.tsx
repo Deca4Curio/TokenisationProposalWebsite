@@ -421,7 +421,7 @@ export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit
                 Let&apos;s get started
               </h1>
               <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-                Tell us a bit about yourself so we can personalise your proposal.
+                Tell us a bit about yourself so we can personalise your report.
               </p>
             </div>
 
@@ -433,7 +433,7 @@ export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit
                   placeholder="Fernando Verboonen"
                 />
               </Field>
-              <Field label="Your phone number" required hint="We may follow up to discuss your proposal.">
+              <Field label="Your phone number" required hint="We may follow up to discuss your report.">
                 <TextInput
                   value={contact.phone}
                   onChange={(v) => setContact((c) => ({ ...c, phone: v }))}
@@ -537,7 +537,7 @@ export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit
                 What do you want to tokenise?
               </h1>
               <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-                Select all that apply. We&apos;ll tailor your proposal to each goal.
+                Select all that apply. We&apos;ll tailor your report to each goal.
               </p>
             </div>
 
@@ -566,7 +566,7 @@ export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit
                 A few more details
               </h1>
               <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-                Help us scope your proposal accurately.
+                Help us scope your report accurately.
               </p>
             </div>
 
@@ -628,10 +628,10 @@ export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit
           <div className="animate-fade-in flex flex-col gap-6">
             <div className="text-center">
               <h1 className="text-2xl font-bold sm:text-3xl" style={{ color: "var(--text-primary)" }}>
-                Ready to generate your proposal
+                Ready to generate your report
               </h1>
               <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-                Review your details below, then generate your proposal or book a call with our team.
+                Review your details below, then generate your report or book a call with our team.
               </p>
             </div>
 
@@ -783,7 +783,7 @@ export default function QuestionnaireWizard({ initial, url, proposalId, onSubmit
             className="flex-1 rounded-xl bg-[var(--color-teal)] py-3.5 text-base font-semibold text-white transition-all hover:shadow-lg active:scale-[0.98] disabled:opacity-50"
             style={{ boxShadow: "0 4px 20px var(--glow-color)" }}
           >
-            {loading ? "Generating..." : "Generate Proposal →"}
+            {loading ? "Generating..." : "Generate Report →"}
           </button>
         )}
       </div>

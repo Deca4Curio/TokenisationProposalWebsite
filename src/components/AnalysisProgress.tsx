@@ -8,7 +8,7 @@ const ANALYSIS_STEPS = [
   { label: "Identifying tokenisable assets", icon: "search" },
   { label: "Modelling token economics", icon: "calc" },
   { label: "Drafting regulatory framework", icon: "shield" },
-  { label: "Generating your proposal", icon: "doc" },
+  { label: "Generating your report", icon: "doc" },
 ];
 
 function StepIcon({ type, done }: { type: string; done: boolean }) {

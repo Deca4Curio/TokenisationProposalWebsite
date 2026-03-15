@@ -111,7 +111,7 @@ export async function prefillQuestionnaire(
     messages: [
       {
         role: "user",
-        content: `You are a tokenisation expert. Analyse this website content and extract/infer the information needed for a tokenisation proposal.
+        content: `You are a tokenisation expert. Analyse this website content and extract/infer the information needed for a tokenisation report.
 
 Website URL: ${url}
 

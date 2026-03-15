@@ -67,7 +67,7 @@ export default function QuestionnairePage() {
         const res = await fetch(`/api/proposals/${id}`);
         if (!res.ok) {
           if (res.status === 401) { router.push("/"); return; }
-          setError("Failed to load proposal");
+          setError("Failed to load report");
           return;
         }
         const data = await res.json();
@@ -168,7 +168,7 @@ export default function QuestionnairePage() {
           </div>
 
           <div className="flex flex-col items-center gap-3 text-center">
-            <h2 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>Generating your proposal</h2>
+            <h2 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>Generating your report</h2>
             <p key={phraseIndex} className="animate-fade-in text-sm" style={{ color: "var(--text-secondary)" }}>
               {GENERATING_PHRASES[phraseIndex]}
             </p>

@@ -89,17 +89,17 @@ export default function DashboardPage() {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-              Your Proposals
+              Your Reports
             </h1>
             <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
-              {proposals.length} proposal{proposals.length !== 1 ? "s" : ""}
+              {proposals.length} report{proposals.length !== 1 ? "s" : ""}
             </p>
           </div>
           <button
             onClick={() => router.push("/")}
             className="rounded-xl bg-[var(--color-teal)] px-6 py-3 text-sm font-semibold text-white transition-all hover:shadow-lg active:scale-95"
           >
-            New Proposal
+            New Report
           </button>
         </div>
 
@@ -123,12 +123,12 @@ export default function DashboardPage() {
                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               />
             </svg>
-            <p style={{ color: "var(--text-muted)" }}>No proposals yet</p>
+            <p style={{ color: "var(--text-muted)" }}>No reports yet</p>
             <button
               onClick={() => router.push("/")}
               className="mt-2 rounded-xl bg-[var(--color-teal)] px-6 py-3 text-sm font-semibold text-white"
             >
-              Create Your First Proposal →
+              Create Your First Report →
             </button>
           </div>
         ) : (

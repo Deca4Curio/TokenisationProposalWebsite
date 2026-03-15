@@ -70,7 +70,7 @@ export default function AuthModal({ open, onClose, onAuthenticated }: AuthModalP
             Enter your email
           </h2>
           <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-            We&apos;ll save your proposal and send you the results.
+            We&apos;ll save your report and send you the results.
           </p>
         </div>
 
@@ -99,7 +99,7 @@ export default function AuthModal({ open, onClose, onAuthenticated }: AuthModalP
         {error && <p className="mt-3 text-center text-sm text-red-500">{error}</p>}
 
         <p className="mt-4 text-center text-xs" style={{ color: "var(--text-muted)" }}>
-          No spam. We only use your email to deliver your proposal.
+          No spam. We only use your email to deliver your report.
         </p>
       </div>
     </div>
