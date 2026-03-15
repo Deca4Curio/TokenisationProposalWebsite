@@ -141,6 +141,7 @@ export default function ReportPage() {
             sections={proposal.report}
             companyName={proposal.questionnaireSubmitted?.companyName || proposal.questionnaire?.companyName || ""}
             url={proposal.url}
+            siteMetadata={proposal.siteMetadata}
           />
         )}
 

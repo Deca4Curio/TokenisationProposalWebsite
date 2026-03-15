@@ -52,9 +52,9 @@ router.post("/", async (req, res) => {
     });
 
     // Scrape
-    let scrapedContent;
+    let scrapeResult;
     try {
-      scrapedContent = await scrapeUrl(url);
+      scrapeResult = await scrapeUrl(url);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Scraping failed";
       await db.collection("proposals").doc(proposalId).update({
@@ -66,6 +66,8 @@ router.post("/", async (req, res) => {
       return;
     }
 
+    const { pages: scrapedContent, metadata: siteMetadata } = scrapeResult;
+
     // AI prefill
     let questionnaire;
     try {
@@ -75,6 +77,7 @@ router.post("/", async (req, res) => {
       await db.collection("proposals").doc(proposalId).update({
         status: "error",
         scrapedContent,
+        siteMetadata,
         errorMessage: message,
         updatedAt: new Date().toISOString(),
       });
@@ -85,6 +88,7 @@ router.post("/", async (req, res) => {
     await db.collection("proposals").doc(proposalId).update({
       status: "questionnaire_ready",
       scrapedContent,
+      siteMetadata,
       questionnaire,
       updatedAt: new Date().toISOString(),
     });

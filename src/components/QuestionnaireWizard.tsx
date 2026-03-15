@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import CompanyBadge from "@/components/CompanyBadge";
 import type {
   Questionnaire,
   ContactInfo,
@@ -470,20 +471,8 @@ export default function QuestionnaireWizard({ initial, url, onSubmit, loading }:
                   </p>
                 </div>
 
-                {/* Skeleton with company preview */}
-                <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg text-xs font-bold" style={{ background: "var(--badge-bg)", color: "var(--accent)" }}>
-                    {company.companyName?.substring(0, 3).toUpperCase() || "..."}
-                  </div>
-                  <div>
-                    <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>
-                      {company.companyName || "Loading..."}
-                    </p>
-                    <p className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
-                      {url.replace(/^https?:\/\//, "")}
-                    </p>
-                  </div>
-                </div>
+                {/* Company preview with real favicon */}
+                <CompanyBadge url={url} companyName={company.companyName || "Loading..."} size="md" />
 
                 {/* Skeleton lines */}
                 <div className="flex flex-col gap-3">
@@ -498,19 +487,7 @@ export default function QuestionnaireWizard({ initial, url, onSubmit, loading }:
             ) : (
               /* Loaded state — editable company info */
               <div className="flex flex-col gap-6">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg text-xs font-bold" style={{ background: "var(--badge-bg)", color: "var(--accent)" }}>
-                    {company.companyName?.substring(0, 3).toUpperCase() || "CO"}
-                  </div>
-                  <div>
-                    <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>
-                      {company.companyName}
-                    </p>
-                    <p className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
-                      {url.replace(/^https?:\/\//, "")}
-                    </p>
-                  </div>
-                </div>
+                <CompanyBadge url={url} companyName={company.companyName} size="lg" />
 
                 <Field label="Company Name" required>
                   <TextInput

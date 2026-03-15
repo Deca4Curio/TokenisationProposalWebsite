@@ -62,6 +62,14 @@ export interface WizardData {
   details: TokenisationDetails;
 }
 
+export interface SiteMetadata {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  favicon?: string;
+  siteName?: string;
+}
+
 export interface ReportSection {
   title: string;
   content: string;
@@ -72,6 +80,7 @@ export interface Proposal {
   userId: string;
   url: string;
   status: ProposalStatus;
+  siteMetadata?: SiteMetadata;
   questionnaire?: Questionnaire;
   questionnaireSubmitted?: Questionnaire;
   report?: ReportSection[];

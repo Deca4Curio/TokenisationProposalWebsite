@@ -17,6 +17,14 @@ export interface ScrapedPage {
   content: string;
 }
 
+export interface SiteMetadata {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  favicon?: string;
+  siteName?: string;
+}
+
 export interface Questionnaire {
   companyName: string;
   industry: string;
@@ -40,6 +48,7 @@ export interface Proposal {
   url: string;
   status: ProposalStatus;
   scrapedContent?: ScrapedPage[];
+  siteMetadata?: SiteMetadata;
   questionnaire?: Questionnaire;
   questionnaireSubmitted?: Questionnaire;
   report?: ReportSection[];

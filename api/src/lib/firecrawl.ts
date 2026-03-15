@@ -1,4 +1,4 @@
-import type { ScrapedPage } from "../types.js";
+import type { ScrapedPage, SiteMetadata } from "../types.js";
 
 const FIRECRAWL_API = "https://api.firecrawl.dev/v1";
 
@@ -9,13 +9,26 @@ interface FirecrawlResponse {
     content?: string;
     metadata?: {
       title?: string;
+      description?: string;
       sourceURL?: string;
+      ogImage?: string;
+      ogTitle?: string;
+      ogDescription?: string;
+      ogSiteName?: string;
+      favicon?: string;
+      language?: string;
+      [key: string]: unknown;
     };
   };
   error?: string;
 }
 
-export async function scrapeUrl(url: string): Promise<ScrapedPage[]> {
+export interface ScrapeResult {
+  pages: ScrapedPage[];
+  metadata: SiteMetadata;
+}
+
+export async function scrapeUrl(url: string): Promise<ScrapeResult> {
   const apiKey = process.env.FIRECRAWL_API_KEY;
   if (!apiKey) throw new Error("FIRECRAWL_API_KEY not configured");
 
@@ -46,11 +59,29 @@ export async function scrapeUrl(url: string): Promise<ScrapedPage[]> {
 
   const content = result.data.markdown || result.data.content || "";
   const truncated = content.slice(0, 8000);
+  const meta = result.data.metadata || {};
 
-  return [
-    {
-      url: result.data.metadata?.sourceURL || url,
-      content: truncated,
-    },
-  ];
+  // Build favicon URL: prefer Firecrawl's, fallback to Google API
+  const domain = new URL(url).hostname;
+  const faviconUrl =
+    meta.favicon ||
+    `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${domain}&size=128`;
+
+  const metadata: SiteMetadata = {
+    title: meta.ogTitle || meta.title || undefined,
+    description: meta.ogDescription || meta.description || undefined,
+    ogImage: meta.ogImage || undefined,
+    favicon: faviconUrl,
+    siteName: meta.ogSiteName || undefined,
+  };
+
+  return {
+    pages: [
+      {
+        url: meta.sourceURL || url,
+        content: truncated,
+      },
+    ],
+    metadata,
+  };
 }

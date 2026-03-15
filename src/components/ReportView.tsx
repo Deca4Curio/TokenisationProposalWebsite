@@ -1,27 +1,24 @@
 "use client";
 
-import type { ReportSection } from "@/types";
+import { useState } from "react";
+import CompanyBadge from "@/components/CompanyBadge";
+import type { ReportSection, SiteMetadata } from "@/types";
 
 interface ReportViewProps {
   sections: ReportSection[];
   companyName: string;
   url: string;
+  siteMetadata?: SiteMetadata;
 }
 
 function renderMarkdown(md: string): string {
   return md
-    // Headers
     .replace(/^### (.+)$/gm, '<h4 class="text-base font-semibold mt-4 mb-2" style="color: var(--text-primary)">$1</h4>')
     .replace(/^## (.+)$/gm, '<h3 class="text-lg font-semibold mt-5 mb-2" style="color: var(--text-primary)">$1</h3>')
-    // Bold
     .replace(/\*\*(.+?)\*\*/g, '<strong style="color: var(--text-primary)">$1</strong>')
-    // Italic
     .replace(/\*(.+?)\*/g, "<em>$1</em>")
-    // Bullet points
     .replace(/^- (.+)$/gm, '<li class="ml-4 mb-1">$1</li>')
-    // Wrap consecutive <li> in <ul>
     .replace(/((?:<li[^>]*>.*<\/li>\n?)+)/g, '<ul class="list-disc mb-3">$1</ul>')
-    // Paragraphs (lines not already tagged)
     .replace(/^(?!<[hul])([\w$"'].+)$/gm, '<p class="mb-3">$1</p>');
 }
 
@@ -32,29 +29,84 @@ const SECTION_ICONS: Record<string, string> = {
   "Smart Contract Architecture": "M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4",
   "Go-to-Market Strategy": "M13 7h8m0 0v8m0-8l-8 8-4-4-6 6",
   "Financial Projections": "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z",
+  "Executive Summary": "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
 };
 
-export default function ReportView({ sections, companyName, url }: ReportViewProps) {
+export default function ReportView({ sections, companyName, url, siteMetadata }: ReportViewProps) {
+  const [ogImgError, setOgImgError] = useState(false);
+  const ogImage = siteMetadata?.ogImage;
+
   return (
     <div className="flex flex-col gap-6">
-      {/* Report header */}
-      <div className="rounded-2xl p-6" style={{ background: "var(--feature-bg)", border: "1px solid var(--border)" }}>
-        <p className="mb-1 text-xs font-medium uppercase tracking-wider" style={{ color: "var(--accent)" }}>
-          Tokenisation Proposal
+      {/* Report hero header */}
+      <div className="relative overflow-hidden rounded-2xl" style={{ border: "1px solid var(--border)" }}>
+        {/* OG image background if available */}
+        {ogImage && !ogImgError && (
+          <div className="absolute inset-0 z-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={ogImage}
+              alt=""
+              className="h-full w-full object-cover"
+              onError={() => setOgImgError(true)}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/30" />
+          </div>
+        )}
+
+        {/* Content overlay */}
+        <div className={`relative z-10 p-6 sm:p-8 ${ogImage && !ogImgError ? "text-white" : ""}`}>
+          <p
+            className="mb-3 text-xs font-semibold uppercase tracking-widest"
+            style={{ color: ogImage && !ogImgError ? "rgba(255,255,255,0.7)" : "var(--accent)" }}
+          >
+            Tokenisation Proposal
+          </p>
+
+          <CompanyBadge
+            url={url}
+            companyName={companyName}
+            favicon={siteMetadata?.favicon}
+            size="lg"
+          />
+
+          {siteMetadata?.description && (
+            <p
+              className="mt-4 max-w-xl text-sm leading-relaxed"
+              style={{ color: ogImage && !ogImgError ? "rgba(255,255,255,0.8)" : "var(--text-secondary)" }}
+            >
+              {siteMetadata.description}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Table of contents */}
+      <div className="rounded-2xl p-5" style={{ background: "var(--bg-input)", border: "1px solid var(--border)" }}>
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+          Contents
         </p>
-        <h1 className="text-2xl font-bold sm:text-3xl" style={{ color: "var(--text-primary)" }}>
-          {companyName}
-        </h1>
-        <p className="mt-1 font-mono text-sm" style={{ color: "var(--text-muted)" }}>
-          {url.replace(/^https?:\/\//, "")}
-        </p>
+        <div className="grid gap-1.5 sm:grid-cols-2">
+          {sections.map((section, i) => (
+            <a
+              key={section.title}
+              href={`#section-${i}`}
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-all hover:bg-[var(--badge-bg)]"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              <span className="font-mono text-xs" style={{ color: "var(--accent)" }}>{String(i + 1).padStart(2, "0")}</span>
+              {section.title}
+            </a>
+          ))}
+        </div>
       </div>
 
       {/* Report sections */}
       {sections.map((section, i) => (
         <div
           key={section.title}
-          className="animate-fade-in-up rounded-2xl p-6 sm:p-8"
+          id={`section-${i}`}
+          className="animate-fade-in-up scroll-mt-8 rounded-2xl p-6 sm:p-8"
           style={{
             background: "var(--bg-card)",
             border: "1px solid var(--border)",
@@ -63,19 +115,11 @@ export default function ReportView({ sections, companyName, url }: ReportViewPro
           }}
         >
           <div className="mb-4 flex items-center gap-3">
-            <div
-              className="flex h-10 w-10 items-center justify-center rounded-xl"
-              style={{ background: "var(--badge-bg)" }}
-            >
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "var(--badge-bg)" }}>
               <svg
-                className="h-5 w-5"
-                style={{ color: "var(--accent)" }}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                className="h-5 w-5" style={{ color: "var(--accent)" }}
+                fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"
               >
                 <path d={SECTION_ICONS[section.title] || SECTION_ICONS["Asset Analysis"]} />
               </svg>
