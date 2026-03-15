@@ -68,11 +68,11 @@ export async function scrapeUrl(url: string): Promise<ScrapeResult> {
     `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${domain}&size=128`;
 
   const metadata: SiteMetadata = {
-    title: meta.ogTitle || meta.title || undefined,
-    description: meta.ogDescription || meta.description || undefined,
-    ogImage: meta.ogImage || undefined,
+    ...(meta.ogTitle || meta.title ? { title: meta.ogTitle || meta.title } : {}),
+    ...(meta.ogDescription || meta.description ? { description: meta.ogDescription || meta.description } : {}),
+    ...(meta.ogImage ? { ogImage: meta.ogImage } : {}),
     favicon: faviconUrl,
-    siteName: meta.ogSiteName || undefined,
+    ...(meta.ogSiteName ? { siteName: meta.ogSiteName } : {}),
   };
 
   return {
