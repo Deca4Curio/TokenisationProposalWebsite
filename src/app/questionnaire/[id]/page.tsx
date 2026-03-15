@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import AnalysisProgress from "@/components/AnalysisProgress";
-import QuestionnaireForm from "@/components/QuestionnaireForm";
+import QuestionnaireWizard from "@/components/QuestionnaireWizard";
 import type { Proposal, Questionnaire } from "@/types";
 
 const GENERATING_PHRASES = [
@@ -32,7 +32,7 @@ function useTheme() {
     document.documentElement.classList.toggle("dark", dark);
     localStorage.setItem("theme", dark ? "dark" : "light");
   }, [dark]);
-  return { dark, toggle: () => setDark((d) => !d) };
+  return { dark };
 }
 
 export default function QuestionnairePage() {
@@ -66,17 +66,13 @@ export default function QuestionnairePage() {
       try {
         const res = await fetch(`/api/proposals/${id}`);
         if (!res.ok) {
-          if (res.status === 401) {
-            router.push("/");
-            return;
-          }
+          if (res.status === 401) { router.push("/"); return; }
           setError("Failed to load proposal");
           return;
         }
         const data = await res.json();
         if (!cancelled) {
           setProposal(data.proposal);
-          // Keep polling if still scraping
           if (data.proposal.status === "scraping") {
             setTimeout(poll, 2000);
           }
@@ -94,7 +90,6 @@ export default function QuestionnairePage() {
     setSubmitting(true);
     setError("");
     try {
-      // Save questionnaire
       const saveRes = await fetch(`/api/proposals/${id}/questionnaire`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -106,10 +101,7 @@ export default function QuestionnairePage() {
         return;
       }
 
-      // Trigger report generation
-      const reportRes = await fetch(`/api/proposals/${id}/report`, {
-        method: "POST",
-      });
+      const reportRes = await fetch(`/api/proposals/${id}/report`, { method: "POST" });
       if (!reportRes.ok) {
         const data = await reportRes.json();
         setError(data.error || "Report generation failed");
@@ -124,28 +116,21 @@ export default function QuestionnairePage() {
     }
   }, [id, router]);
 
-  // Loading / scraping state
+  // ─── Loading / scraping ────────────────────────────────────────────────────
+
   if (!proposal || proposal.status === "scraping") {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-6" style={{ background: "var(--bg)" }}>
         <div className="flex w-full max-w-md flex-col items-center gap-10">
-          <div className="flex items-center gap-4">
-            <Image src="/logos/deca4.svg" alt="Deca4" width={136} height={50} className="h-7 w-auto" priority />
-            <span style={{ color: "var(--text-faint)" }} className="text-lg font-light">x</span>
-            <Image
-              src="/logos/curio.svg" alt="Curio" width={120} height={20}
-              className={`h-5 w-auto ${dark ? "invert" : ""}`}
-              style={{ filter: dark ? "invert(1) hue-rotate(180deg)" : undefined }}
-              priority
-            />
-          </div>
+          <PartnerLogos dark={dark} />
           <AnalysisProgress url={proposal?.url || "..."} animate={true} />
         </div>
       </div>
     );
   }
 
-  // Error state
+  // ─── Error ─────────────────────────────────────────────────────────────────
+
   if (proposal.status === "error") {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-6" style={{ background: "var(--bg)" }}>
@@ -157,10 +142,7 @@ export default function QuestionnairePage() {
           </div>
           <h2 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>Something went wrong</h2>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{proposal.errorMessage}</p>
-          <button
-            onClick={() => router.push("/")}
-            className="rounded-xl bg-[var(--color-teal)] px-6 py-3 text-sm font-semibold text-white"
-          >
+          <button onClick={() => router.push("/")} className="rounded-xl bg-[var(--color-teal)] px-6 py-3 text-sm font-semibold text-white">
             Try Again
           </button>
         </div>
@@ -168,67 +150,39 @@ export default function QuestionnairePage() {
     );
   }
 
-  // Generating report state
+  // ─── Generating report ─────────────────────────────────────────────────────
+
   if (submitting) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-6" style={{ background: "var(--bg)" }}>
         <div className="animate-scale-in flex w-full max-w-md flex-col items-center gap-10">
-          <div className="flex items-center gap-4">
-            <Image src="/logos/deca4.svg" alt="Deca4" width={136} height={50} className="h-7 w-auto" priority />
-            <span style={{ color: "var(--text-faint)" }} className="text-lg font-light">x</span>
-            <Image
-              src="/logos/curio.svg" alt="Curio" width={120} height={20}
-              className={`h-5 w-auto ${dark ? "invert" : ""}`}
-              style={{ filter: dark ? "invert(1) hue-rotate(180deg)" : undefined }}
-              priority
-            />
-          </div>
+          <PartnerLogos dark={dark} />
 
-          {/* Spinner */}
           <div className="relative flex h-24 w-24 items-center justify-center">
             <div className="absolute inset-0 rounded-full" style={{ border: "1px solid var(--spinner-track)" }} />
             <div className="absolute inset-0 animate-spin-slow rounded-full border-2 border-transparent border-t-[var(--color-teal)]" />
-            <div
-              className="absolute inset-3 animate-spin-slow rounded-full border border-transparent border-b-[var(--color-purple)]"
-              style={{ animationDirection: "reverse", animationDuration: "3s" }}
-            />
+            <div className="absolute inset-3 animate-spin-slow rounded-full border border-transparent border-b-[var(--color-purple)]" style={{ animationDirection: "reverse", animationDuration: "3s" }} />
             <svg className="h-6 w-6" style={{ color: "var(--accent)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
             </svg>
           </div>
 
-          {/* Rotating phrase */}
           <div className="flex flex-col items-center gap-3 text-center">
-            <h2 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
-              Generating your proposal
-            </h2>
-            <p
-              key={phraseIndex}
-              className="animate-fade-in text-sm"
-              style={{ color: "var(--text-secondary)" }}
-            >
+            <h2 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>Generating your proposal</h2>
+            <p key={phraseIndex} className="animate-fade-in text-sm" style={{ color: "var(--text-secondary)" }}>
               {GENERATING_PHRASES[phraseIndex]}
             </p>
           </div>
 
-          {/* URL tag */}
-          <div
-            className="flex items-center gap-2 rounded-full px-4 py-2"
-            style={{ background: "var(--url-tag-bg)", border: "1px solid var(--url-tag-border)" }}
-          >
+          <div className="flex items-center gap-2 rounded-full px-4 py-2" style={{ background: "var(--url-tag-bg)", border: "1px solid var(--url-tag-border)" }}>
             <div className="h-2 w-2 animate-pulse rounded-full bg-[var(--color-teal)]" />
-            <span className="font-mono text-xs" style={{ color: "var(--text-muted)" }}>
-              {proposal?.url.replace(/^https?:\/\//, "")}
-            </span>
+            <span className="font-mono text-xs" style={{ color: "var(--text-muted)" }}>{proposal?.url.replace(/^https?:\/\//, "")}</span>
           </div>
 
           {error && (
             <div className="rounded-xl p-4 text-center text-sm text-red-500" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
               {error}
-              <button
-                onClick={() => { setSubmitting(false); setError(""); }}
-                className="mt-2 block w-full text-xs underline"
-              >
+              <button onClick={() => { setSubmitting(false); setError(""); }} className="mt-2 block w-full text-xs underline">
                 Go back to questionnaire
               </button>
             </div>
@@ -238,28 +192,14 @@ export default function QuestionnairePage() {
     );
   }
 
-  // Questionnaire form
+  // ─── Questionnaire Wizard ──────────────────────────────────────────────────
+
   return (
-    <div className="min-h-screen px-6 py-12" style={{ background: "var(--bg)" }}>
+    <div className="min-h-screen px-6 py-8 sm:py-12" style={{ background: "var(--bg)" }}>
       <div className="mx-auto max-w-2xl">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <div className="mb-4 flex items-center justify-center gap-2 rounded-full">
-            <div className="flex items-center gap-2 rounded-full px-4 py-1.5" style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)" }}>
-              <svg className="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-              <span className="text-xs font-medium text-green-500">Analysis complete</span>
-            </div>
-          </div>
-          <h1 className="text-2xl font-bold sm:text-3xl" style={{ color: "var(--text-primary)" }}>
-            Review your proposal details
-          </h1>
-          <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-            We pre-filled this based on{" "}
-            <span className="font-mono font-medium" style={{ color: "var(--accent)" }}>
-              {proposal.url.replace(/^https?:\/\//, "")}
-            </span>
-            . Adjust anything before we generate your full report.
-          </p>
+        {/* Header logos */}
+        <div className="mb-8 flex justify-center">
+          <PartnerLogos dark={dark} />
         </div>
 
         {error && (
@@ -269,17 +209,31 @@ export default function QuestionnairePage() {
         )}
 
         {proposal.questionnaire && (
-          <QuestionnaireForm
+          <QuestionnaireWizard
             initial={proposal.questionnaire}
+            url={proposal.url}
             onSubmit={handleSubmit}
             loading={submitting}
           />
         )}
-
-        <p className="mt-6 text-center text-xs" style={{ color: "var(--text-muted)" }}>
-          Your report will be generated in about 30 seconds.
-        </p>
       </div>
+    </div>
+  );
+}
+
+// ─── Shared Logo Component ───────────────────────────────────────────────────
+
+function PartnerLogos({ dark }: { dark: boolean }) {
+  return (
+    <div className="flex items-center gap-4">
+      <Image src="/logos/deca4.svg" alt="Deca4 Advisory" width={136} height={50} className="h-7 w-auto" priority />
+      <span style={{ color: "var(--text-faint)" }} className="text-lg font-light">x</span>
+      <Image
+        src="/logos/curio.svg" alt="curioInvest" width={120} height={20}
+        className={`h-5 w-auto ${dark ? "invert" : ""}`}
+        style={{ filter: dark ? "invert(1) hue-rotate(180deg)" : undefined }}
+        priority
+      />
     </div>
   );
 }
